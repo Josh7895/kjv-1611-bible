@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6WWeY2C24nhv8eUdKBClaM2mp8C9qrP7n94LR4IEMQE='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EUw67cIKwSmmjFTZDkc1CVd1cfuwAkeZ/CglJeO1oHY='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -1210,32 +1210,56 @@ function refreshOfflineStatusMessage(){
     updateOfflineStatus("Offline mode is active. Use \u201cSave for Offline\u201d to pre-load the whole Bible and every illustration.");
   }
 }
+/* Asks the service worker to save urls; done(failedCount, total) runs once
+   it replies to this request (matched by id, so an earlier save's reply
+   can't be mistaken for this one's). */
+var cacheRequestSeq = 0;
+function cacheUrls(urls, done){
+  var id = "save-" + Date.now() + "-" + (++cacheRequestSeq);
+  function handler(ev){
+    if (!ev.data || ev.data.type!=="CACHE_URLS_DONE" || ev.data.id!==id) return;
+    navigator.serviceWorker.removeEventListener("message", handler);
+    var results = ev.data.results || [];
+    done(results.filter(function(r){ return !r.ok; }).length, urls.length);
+  }
+  navigator.serviceWorker.addEventListener("message", handler);
+  navigator.serviceWorker.controller.postMessage({type:"CACHE_URLS", id:id, urls:urls});
+  return handler;
+}
 var downloadForOfflineHandler = null;
 function downloadForOffline(){
   if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
-  var urls = [KJV_LOCAL_URL];
+  var urls = []; // the KJV text itself is already stored when the app installs
   Object.keys(ART).forEach(function(key){
     urls.push(commonsUrl(ART[key].f, 700));
     urls.push(commonsUrl(ART[key].f, 480));
   });
   updateOfflineStatus("Saving " + urls.length + " files for offline use\u2026");
   if (downloadForOfflineHandler) navigator.serviceWorker.removeEventListener("message", downloadForOfflineHandler);
-  navigator.serviceWorker.controller.postMessage({type:"CACHE_URLS", urls:urls});
-  downloadForOfflineHandler = function handler(ev){
-    if (ev.data && ev.data.type==="CACHE_URLS_DONE"){
-      updateOfflineStatus("Saved. The whole Bible and every illustration will now work with no connection.");
-      navigator.serviceWorker.removeEventListener("message", handler);
-      downloadForOfflineHandler = null;
-    }
-  };
-  navigator.serviceWorker.addEventListener("message", downloadForOfflineHandler);
+  downloadForOfflineHandler = cacheUrls(urls, function(failed, total){
+    downloadForOfflineHandler = null;
+    if (!failed) updateOfflineStatus("Saved. The whole Bible and every illustration will now work with no connection.");
+    else updateOfflineStatus(failed + " of " + total + " files failed to save (check your connection and try again). The Bible text still works offline.");
+  });
+}
+/* Removes only saved narration and illustrations — never the app itself,
+   so it still opens offline afterwards. */
+function isSavedMedia(url){
+  return /^https:\/\/([a-z0-9-]+\.)*(archive\.org|wikimedia\.org)\//i.test(url);
 }
 function clearOfflineData(){
   if (!("caches" in window)){ return; }
   caches.keys().then(function(names){
-    return Promise.all(names.map(function(n){ return caches.delete(n); }));
+    return Promise.all(names.map(function(n){
+      return caches.open(n).then(function(cache){
+        return cache.keys().then(function(reqs){
+          return Promise.all(reqs.filter(function(r){ return isSavedMedia(r.url); })
+            .map(function(r){ return cache.delete(r); }));
+        });
+      });
+    }));
   }).then(function(){
-    updateOfflineStatus("Offline data cleared.");
+    updateOfflineStatus("Saved narration and illustrations cleared. The Bible text still works offline.");
   });
 }
 
@@ -1318,15 +1342,11 @@ function buildNarrationPlayer(book, chapter){
     if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
     dl.disabled = true; dl.textContent = "Saving\u2026";
     if (narrationDownloadHandler) navigator.serviceWorker.removeEventListener("message", narrationDownloadHandler);
-    navigator.serviceWorker.controller.postMessage({type:"CACHE_URLS", urls:[LIBRIVOX_BASE + match.file]});
-    narrationDownloadHandler = function handler(ev){
-      if (ev.data && ev.data.type==="CACHE_URLS_DONE"){
-        dl.textContent = "Saved for offline \u2713";
-        navigator.serviceWorker.removeEventListener("message", handler);
-        narrationDownloadHandler = null;
-      }
-    };
-    navigator.serviceWorker.addEventListener("message", narrationDownloadHandler);
+    narrationDownloadHandler = cacheUrls([LIBRIVOX_BASE + match.file], function(failed){
+      narrationDownloadHandler = null;
+      if (failed) dl.disabled = false;
+      dl.textContent = failed ? "Couldn\u2019t save \u2014 tap to try again" : "Saved for offline \u2713";
+    });
   });
   wrap.appendChild(dl);
 
