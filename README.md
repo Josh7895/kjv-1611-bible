@@ -44,5 +44,3 @@ Audio is never cached just because it played, only when you save it.
 - LibriVox files are chapter-*range* recordings (e.g. one file covers
   Genesis 1-14); playback jumps to an estimated spot for your chapter,
   not an exact timestamp.
-- I haven't seen this rendered — no display in my build environment.
-  Real-device testing will surface things worth adjusting.

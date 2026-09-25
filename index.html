@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MdLZUnJXluhokINxCdtCifrIhVS9V94jG9wzpuHUU34='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6WWeY2C24nhv8eUdKBClaM2mp8C9qrP7n94LR4IEMQE='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -125,6 +125,7 @@ ul.book-list li{ margin:0; }
   margin-bottom:18px;
 }
 #topbar .actions{ display:flex; gap:8px; align-items:center; }
+#navToggle{ display:none; }
 .iconbtn{
   background:var(--panel-bg); border:1px solid var(--rule); color:var(--ink);
   font-family:'IM Fell English SC',serif; font-size:12px; letter-spacing:.06em;
@@ -377,6 +378,7 @@ ul.book-list li{ margin:0; }
 @media (max-width: 820px){
   #nav{ position:fixed; left:-280px; z-index:60; transition:left .25s ease; box-shadow:10px 0 30px rgba(0,0,0,.5); }
   #nav.open{ left:0; }
+  #navToggle{ display:inline-block; }
   .nav-close{ display:flex; }
   #navBackdrop.open{ display:block; }
   .page{ padding:30px 22px 44px; }
@@ -415,7 +417,7 @@ ul.book-list li{ margin:0; }
 
   <div id="reader-wrap">
     <div id="topbar">
-      <button class="iconbtn" id="navToggle" style="display:none">&#9776;&nbsp;Index</button>
+      <button class="iconbtn" id="navToggle">&#9776;&nbsp;Index</button>
       <div class="actions">
         <button class="iconbtn" id="bookmarkBtn" aria-label="Bookmark this passage">&#9734;<span class="btn-label">&nbsp;Bookmark</span></button>
         <button class="iconbtn" id="bookmarksListBtn" aria-label="View bookmarks">&#128278;<span class="btn-label">Bookmarks</span></button>
@@ -428,7 +430,7 @@ ul.book-list li{ margin:0; }
 
     <div class="page" id="pageEl">
       <div id="pageBody">
-        <div class="loading-msg" id="loadingMsg">Illuminating the manuscript&hellip; fetching the text of the Authorized Version.</div>
+        <div class="loading-msg" id="loadingMsg">Illuminating the manuscript&hellip; opening the text of the Authorized Version.</div>
       </div>
     </div>
   </div>
@@ -543,10 +545,13 @@ ul.book-list li{ margin:0; }
 
     <button id="closeSettings">Close</button>
     <div class="settings-note">
-      Scripture text is fetched live from a public-domain KJV source, and the
-      engravings from Wikimedia Commons &mdash; both need an internet
-      connection. Music and narration are generated in your browser; nothing
-      is uploaded anywhere.
+      The Scripture text is bundled with this app (an online copy on GitHub
+      is used only if the bundled one can't be read). Narration and the hymn
+      playlist stream from archive.org, the engravings load from Wikimedia
+      Commons, and the fonts from Google Fonts &mdash; those services see
+      your IP address when they send these files, as any website does. The
+      ambient drone is generated in your browser, and your settings and
+      bookmarks are stored only on this device.
     </div>
   </div>
 </div>
@@ -1013,7 +1018,7 @@ function openChapter(book, chapter){
   $("pageEl").scrollIntoView({behavior:"instant", block:"start"});
   window.scrollTo(0,0);
   if ("speechSynthesis" in window && speechSynthesis.speaking) speechSynthesis.cancel();
-  if (state.autoRead) readChapterAloud();
+  if (state.autoRead) readChapterAloud(true);
 }
 
 function navigateChapter(delta){
@@ -1298,7 +1303,7 @@ function buildNarrationPlayer(book, chapter){
     if (audio.readyState >= 1) apply(); // HAVE_METADATA already available
     else audio.addEventListener("loadedmetadata", apply, {once:true});
   }
-  if (!sameFileAlreadyPlaying){
+  if (!sameFileAlreadyPlaying || audio.paused){ // paused: move to this chapter; playing: let it carry on
     seekTo(seekFractionForVerse(book, chapter, 1));
   }
 
@@ -1341,11 +1346,13 @@ function seekNarrationToVerse(book, chapter, verse){
   else audio.addEventListener("loadedmetadata", apply, {once:true});
 }
 
-function readChapterAloud(){
+/* keepPlaying: set by auto-read on page turn, so narration already playing
+   carries on instead of being toggled to paused. */
+function readChapterAloud(keepPlaying){
   var match = findLibrivoxFile(state.book, state.chapter);
   var audioEl = (match && state.narrSource!=="tts") ? $("librivoxAudio") : null;
   if (audioEl){
-    if (!audioEl.paused){ audioEl.pause(); }
+    if (!audioEl.paused){ if (!keepPlaying) audioEl.pause(); }
     else { audioEl.play().catch(function(){}); }
     return;
   }
@@ -1598,7 +1605,7 @@ function initSettingsUI(){
   });
   $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
 
-  $("readAloudBtn").addEventListener("click", readChapterAloud);
+  $("readAloudBtn").addEventListener("click", function(){ readChapterAloud(false); });
 
   $("navToggle").addEventListener("click", function(){
     $("nav").classList.add("open"); $("navBackdrop").classList.add("open");
@@ -1624,7 +1631,6 @@ function initSettingsUI(){
       if (navigateChapter(e.key==="ArrowRight" ? 1 : -1)) e.preventDefault();
     }
   });
-  if (window.innerWidth<=820) $("navToggle").style.display="";
 
   var touchStartX=null, touchStartY=null;
   $("pageEl").addEventListener("touchstart", function(e){
@@ -1670,10 +1676,11 @@ function boot(){
     openChapter(startBook, startCh);
   }).catch(function(err){
     $("pageBody").innerHTML =
-      '<div class="loading-msg">The manuscript could not be fetched (' +
+      '<div class="loading-msg">The manuscript could not be loaded (' +
       (err && err.message ? err.message.replace(/</g,"&lt;") : "unknown error") +
-      ').<br><br>This page needs an internet connection to load the KJV text ' +
-      'and engravings the first time. Check your connection and reload.</div>';
+      ').<br><br>The KJV text is bundled with this app, but browsers block reading it ' +
+      'when the page is opened as a local file; it then falls back to an online copy, ' +
+      'which needs an internet connection. Check your connection and reload.</div>';
   });
 }
 
