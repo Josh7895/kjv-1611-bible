@@ -1,0 +1,3 @@
+# Keep LF everywhere: the CSP hash in index.html is computed over LF bytes.
+* text=auto eol=lf
+*.png binary
