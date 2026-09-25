@@ -1,0 +1,44 @@
+# The Holy Bible — Anno 1611
+
+A single HTML file, now a full PWA. Works two ways:
+
+**Quick use:** double-click the file, opens in any browser.
+
+**Full experience (installable + offline):** put these files together on
+free static hosting (e.g. GitHub Pages) and open it from there:
+`index.html`, `manifest.json`, `service-worker.js`, `icons/` folder.
+Service workers only activate on `https://` (never on a local double-clicked
+file), so installing to your home screen and offline mode both need it
+hosted somewhere — GitHub Pages is free and takes about five minutes:
+create a repo, upload these files, turn on Pages in repo settings, done.
+Once hosted, open it once online, then "Add to Home Screen" (phone) or
+install icon (desktop Chrome/Edge) — it now behaves like a real app.
+
+## What's real vs. generated
+
+- **Text**: standard KJV, fetched live from a public-domain source.
+- **Illustrations**: ~30 real 1866 Gustave Doré engravings, individually
+  verified on Wikimedia Commons (their policy bans watermarked PD scans).
+- **Narration**: real human narration — the complete public-domain
+  LibriVox KJV recording (reader: Michael Armenta), chapter-mapped from
+  the actual file listing, all 66 books. Falls back to your browser's
+  built-in voice if a file won't load.
+- **Music**: a generated ambient drone by default, plus a real
+  public-domain piano-hymn playlist you can switch to in Settings.
+
+## Features
+
+Bookmarks (star icon), adjustable font + font family, light/dark
+(Parchment / Candlelit Stone), verse-number toggle, swipe to turn pages,
+keep-screen-on while reading, "Save for Offline" (caches the text + all
+art; narration saves per-recording via the button under the player).
+
+## Known limits
+
+- Text is standard-spelling KJV in 1611-style *presentation*, not literal
+  1611 orthography.
+- LibriVox files are chapter-*range* recordings (e.g. one file covers
+  Genesis 1-14); playback jumps to an estimated spot for your chapter,
+  not an exact timestamp.
+- I haven't seen this rendered — no display in my build environment.
+  Real-device testing will surface things worth adjusting.

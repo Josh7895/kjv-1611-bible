@@ -1,0 +1,72 @@
+/* Service worker for The Holy Bible — Anno 1611.
+   Stale-while-revalidate: serves from cache instantly when available
+   (works fully offline once things have loaded once), while quietly
+   refreshing the cache from the network in the background when online.
+
+   IMPORTANT: service workers only register on https:// (or localhost).
+   Opening this file directly (file://) skips this entirely — the app
+   still works, it just won't be installable or offline-capable until
+   it's hosted somewhere real. */
+
+var CACHE_NAME = "kjv1611-v1";
+var APP_SHELL = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icons/icon-192.png",
+  "./icons/icon-512.png",
+  "./icons/apple-touch-icon.png"
+];
+
+self.addEventListener("install", function(event){
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(function(cache){ return cache.addAll(APP_SHELL); })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", function(event){
+  event.waitUntil(
+    caches.keys().then(function(names){
+      return Promise.all(names.filter(function(n){ return n !== CACHE_NAME; })
+        .map(function(n){ return caches.delete(n); }));
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", function(event){
+  var req = event.request;
+  if (req.method !== "GET") return;
+
+  event.respondWith(
+    caches.match(req).then(function(cached){
+      var fetchPromise = fetch(req).then(function(networkResp){
+        if (networkResp && (networkResp.status === 200 || networkResp.type === "opaque")){
+          var copy = networkResp.clone();
+          caches.open(CACHE_NAME).then(function(cache){ cache.put(req, copy); });
+        }
+        return networkResp;
+      }).catch(function(){ return cached; });
+      return cached || fetchPromise;
+    })
+  );
+});
+
+/* Lets the page ask the service worker to eagerly pull specific URLs into
+   the cache (used for the "download this book for offline" button). */
+self.addEventListener("message", function(event){
+  if (event.data && event.data.type === "CACHE_URLS" && Array.isArray(event.data.urls)){
+    event.waitUntil(
+      caches.open(CACHE_NAME).then(function(cache){
+        return Promise.all(event.data.urls.map(function(url){
+          return fetch(url, {mode:"cors"}).then(function(resp){
+            if (resp && (resp.status===200 || resp.type==="opaque")) return cache.put(url, resp);
+          }).catch(function(){ /* ignore individual failures */ });
+        }));
+      }).then(function(){
+        if (event.source) event.source.postMessage({type:"CACHE_URLS_DONE"});
+      })
+    );
+  }
+});
