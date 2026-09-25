@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-aM8zfIbdXnCF2CXiuwzgT2D8Ck+MVOVpT/e4v4R0Ez8='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-MdLZUnJXluhokINxCdtCifrIhVS9V94jG9wzpuHUU34='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -220,6 +220,11 @@ ul.book-list li{ margin:0; }
   float:left; font-family:var(--scripture-font, 'UnifrakturMaguntia', serif); font-size:4.6em;
   line-height:.72; padding:.03em .09em 0 0; color:var(--rubric);
 }
+.verse-flash{ animation: verseFlash 2s ease-out; border-radius:2px; }
+@keyframes verseFlash{
+  0%{ background-color: var(--gold); }
+  100%{ background-color: transparent; }
+}
 .loading-msg{
   font-family:'IM Fell English', serif; font-style:italic; color:var(--ink-soft);
   text-align:center; padding:60px 0; font-size:16px;
@@ -327,6 +332,47 @@ ul.book-list li{ margin:0; }
   font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:13px; cursor:pointer;
 }
 
+/* ---- Search panel (shares overlay pattern with settings/bookmarks) ---- */
+#overlay3{
+  position:fixed; inset:0; background:rgba(0,0,0,.55); display:none;
+  align-items:center; justify-content:center; z-index:50;
+}
+#overlay3.open{ display:flex; }
+#searchPanel{
+  width:420px; max-width:92vw; max-height:88vh; overflow-y:auto;
+  background:var(--panel-bg); border:1px solid var(--rule); box-shadow:0 20px 60px rgba(0,0,0,.6);
+  padding:28px 30px 26px;
+}
+#searchPanel h2{
+  font-family:'UnifrakturMaguntia', serif; color:var(--rubric); margin:0 0 16px; font-size:26px;
+  text-align:center;
+}
+#searchInput{
+  width:100%; box-sizing:border-box; font-family:'IM Fell English', serif; font-size:15px;
+  padding:8px 10px; background:var(--parchment); color:var(--ink); border:1px solid var(--rule);
+}
+.search-status{
+  font-family:'IM Fell English', serif; font-style:italic; font-size:12px; color:var(--ink-soft);
+  margin:10px 0;
+}
+#searchResults{ max-height:50vh; overflow-y:auto; }
+.search-result{
+  display:block; width:100%; text-align:left; background:none; border:none;
+  border-bottom:1px solid var(--rule); padding:10px 4px; cursor:pointer; color:var(--ink);
+  font-family:'IM Fell English', serif;
+}
+.search-result:hover{ background:rgba(0,0,0,.05); }
+.search-result-ref{
+  display:block; font-family:'IM Fell English SC', serif; font-size:12px; letter-spacing:.05em;
+  color:var(--gold); margin-bottom:3px;
+}
+.search-result-text{ font-size:14px; line-height:1.5; }
+.search-result-text mark{ background:var(--rubric); color:#fbe9d9; padding:0 1px; }
+#closeSearch{
+  width:100%; margin-top:14px; padding:10px; background:var(--rubric); color:#fbe9d9; border:none;
+  font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:13px; cursor:pointer;
+}
+
 /* Responsive */
 @media (max-width: 820px){
   #nav{ position:fixed; left:-280px; z-index:60; transition:left .25s ease; box-shadow:10px 0 30px rgba(0,0,0,.5); }
@@ -373,6 +419,7 @@ ul.book-list li{ margin:0; }
       <div class="actions">
         <button class="iconbtn" id="bookmarkBtn" aria-label="Bookmark this passage">&#9734;<span class="btn-label">&nbsp;Bookmark</span></button>
         <button class="iconbtn" id="bookmarksListBtn" aria-label="View bookmarks">&#128278;<span class="btn-label">Bookmarks</span></button>
+        <button class="iconbtn" id="searchBtn" aria-label="Search the Bible">&#128269;<span class="btn-label">&nbsp;Search</span></button>
         <button class="iconbtn" id="readAloudBtn" aria-label="Read aloud">&#9835;<span class="btn-label">&nbsp;Read Aloud</span></button>
         <button class="iconbtn" id="artToggleBtn" aria-label="Toggle illustrations">&#127912;<span class="btn-label">Illustrations</span></button>
         <button class="iconbtn" id="settingsBtn" aria-label="Settings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
@@ -509,6 +556,16 @@ ul.book-list li{ margin:0; }
     <h2>Bookmarks</h2>
     <div id="bookmarksList"></div>
     <button id="closeBookmarks">Close</button>
+  </div>
+</div>
+
+<div id="overlay3">
+  <div id="searchPanel">
+    <h2>Search</h2>
+    <input type="search" id="searchInput" aria-label="Search the Bible" placeholder="Search the Bible&hellip;">
+    <div class="search-status" id="searchStatus"></div>
+    <div id="searchResults"></div>
+    <button id="closeSearch">Close</button>
   </div>
 </div>
 
@@ -740,7 +797,15 @@ var state = {
 function loadState(){
   try{
     var raw = localStorage.getItem("kjv1611-settings");
-    if (raw){ var s = JSON.parse(raw); for (var k in s){ if (k in state) state[k]=s[k]; } }
+    if (raw){
+      var s = JSON.parse(raw);
+      for (var k in s){
+        if (k in state && typeof s[k] === typeof state[k] &&
+            (typeof s[k] !== "number" || isFinite(s[k]))){
+          state[k]=s[k];
+        }
+      }
+    }
   }catch(e){ /* storage unavailable — fall back to in-memory defaults */ }
 }
 function saveState(){
@@ -807,11 +872,13 @@ function buildNav(){
     var li = el("li");
     var btn = el("button", "book-btn", book);
     btn.setAttribute("data-book", book);
+    btn.setAttribute("aria-expanded", "false");
     btn.addEventListener("click", function(){ toggleChapterGrid(book); });
     li.appendChild(btn);
 
     var grid = el("div", "chapter-grid");
     grid.id = "grid-" + cssId(book);
+    btn.setAttribute("aria-controls", grid.id);
     var chapters = Object.keys(BIBLE[book]).sort(function(a,b){return a-b;});
     chapters.forEach(function(chNum){
       var cbtn = el("button", "chap-btn", toRoman(Number(chNum)));
@@ -826,11 +893,19 @@ function buildNav(){
 }
 function cssId(book){ return book.replace(/[^a-zA-Z0-9]/g,"_"); }
 
+function syncBookBtnAria(){
+  document.querySelectorAll(".book-btn").forEach(function(b){
+    var grid = $("grid-" + cssId(b.getAttribute("data-book")));
+    b.setAttribute("aria-expanded", (grid && grid.classList.contains("open")) ? "true" : "false");
+  });
+}
+
 function toggleChapterGrid(book){
   var grid = $("grid-" + cssId(book));
   var isOpen = grid.classList.contains("open");
   document.querySelectorAll(".chapter-grid.open").forEach(function(g){ g.classList.remove("open"); });
   if (!isOpen) grid.classList.add("open");
+  syncBookBtnAria();
 }
 
 function updateNavHighlight(){
@@ -838,12 +913,14 @@ function updateNavHighlight(){
     b.classList.toggle("active", b.getAttribute("data-book")===state.book);
   });
   document.querySelectorAll(".chap-btn").forEach(function(b){ b.classList.remove("active"); });
+  document.querySelectorAll(".chapter-grid.open").forEach(function(g){ g.classList.remove("open"); });
   var grid = $("grid-" + cssId(state.book));
   if (grid){
     grid.classList.add("open");
     var idx = Object.keys(BIBLE[state.book]).sort(function(a,b){return a-b;}).indexOf(String(state.chapter));
     if (idx>=0) grid.children[idx].classList.add("active");
   }
+  syncBookBtnAria();
 }
 
 function closeNavOnMobile(){
@@ -899,18 +976,21 @@ function openChapter(book, chapter){
   p.style.setProperty("--fs", state.fontSize+"px");
   p.classList.toggle("hide-vnum", !state.showVerseNum);
   nums.forEach(function(n, i){
+    var vSpan = el("span","verse");
+    vSpan.id = "v-" + n;
     var sup = el("sup","vnum", n);
     if (findLibrivoxFile(book, chapter)){
       sup.title = "Start narration at verse " + n;
       sup.addEventListener("click", function(){ seekNarrationToVerse(book, chapter, Number(n)); });
     }
-    p.appendChild(sup);
+    vSpan.appendChild(sup);
     var text = verses[n];
     if (i===0 && text.length){
-      p.appendChild(el("span","dropcap", text.charAt(0)));
+      vSpan.appendChild(el("span","dropcap", text.charAt(0)));
       text = text.slice(1);
     }
-    p.appendChild(document.createTextNode(text + " "));
+    vSpan.appendChild(document.createTextNode(text + " "));
+    p.appendChild(vSpan);
   });
   body.appendChild(p);
 
@@ -932,7 +1012,7 @@ function openChapter(book, chapter){
   updateBookmarkBtn();
   $("pageEl").scrollIntoView({behavior:"instant", block:"start"});
   window.scrollTo(0,0);
-  if (speechSynthesis.speaking) speechSynthesis.cancel();
+  if ("speechSynthesis" in window && speechSynthesis.speaking) speechSynthesis.cancel();
   if (state.autoRead) readChapterAloud();
 }
 
@@ -942,12 +1022,13 @@ function navigateChapter(delta){
   var maxCh = Object.keys(BIBLE[book]).length;
   if (chapter<1){
     if (bookIdx>0){ book=BOOK_ORDER[bookIdx-1]; chapter=Object.keys(BIBLE[book]).length; }
-    else { book=BOOK_ORDER[BOOK_ORDER.length-1]; chapter=Object.keys(BIBLE[book]).length; }
+    else return false; /* Genesis 1 — nothing before it */
   } else if (chapter>maxCh){
     if (bookIdx<BOOK_ORDER.length-1){ book=BOOK_ORDER[bookIdx+1]; chapter=1; }
-    else { book=BOOK_ORDER[0]; chapter=1; }
+    else return false; /* last chapter of the last book — nothing after it */
   }
   openChapter(book, chapter);
+  return true;
 }
 
 /* ============================================================
@@ -995,6 +1076,98 @@ function renderBookmarksList(){
 }
 
 /* ============================================================
+   Search
+   ============================================================ */
+var searchDebounceTimer = null;
+var MIN_SEARCH_LEN = 3;
+var MAX_SEARCH_RESULTS = 200;
+
+function searchBible(query){
+  var q = query.toLowerCase();
+  var results = [];
+  BOOK_ORDER.forEach(function(book){
+    var chapters = BIBLE[book];
+    Object.keys(chapters).sort(function(a,b){return a-b;}).forEach(function(ch){
+      var verses = chapters[ch];
+      Object.keys(verses).sort(function(a,b){return a-b;}).forEach(function(vn){
+        var text = verses[vn];
+        if (text.toLowerCase().indexOf(q) !== -1){
+          results.push({book:book, chapter:Number(ch), verse:Number(vn), text:text});
+        }
+      });
+    });
+  });
+  return results;
+}
+
+/* Case-insensitive plain-substring highlight — built from text nodes and
+   <mark> elements only, never innerHTML with the matched text. */
+function highlightMatches(text, query){
+  var frag = document.createDocumentFragment();
+  var lowText = text.toLowerCase(), lowQuery = query.toLowerCase();
+  var idx = 0;
+  while (true){
+    var pos = lowText.indexOf(lowQuery, idx);
+    if (pos === -1){
+      frag.appendChild(document.createTextNode(text.slice(idx)));
+      break;
+    }
+    if (pos > idx) frag.appendChild(document.createTextNode(text.slice(idx, pos)));
+    var mark = document.createElement("mark");
+    mark.textContent = text.slice(pos, pos + query.length);
+    frag.appendChild(mark);
+    idx = pos + query.length;
+  }
+  return frag;
+}
+
+function renderSearchResults(query){
+  var status = $("searchStatus"), list = $("searchResults");
+  list.innerHTML = "";
+  if (query.length < MIN_SEARCH_LEN){
+    status.textContent = "";
+    return;
+  }
+  var results = searchBible(query);
+  if (!results.length){
+    status.textContent = "No verses found";
+  } else {
+    var msg = results.length + " verse" + (results.length===1 ? "" : "s") + " found";
+    if (results.length > MAX_SEARCH_RESULTS) msg += ". Showing first " + MAX_SEARCH_RESULTS + " — refine your search.";
+    status.textContent = msg;
+  }
+  results.slice(0, MAX_SEARCH_RESULTS).forEach(function(r){
+    var row = el("button","search-result");
+    row.appendChild(el("span","search-result-ref", r.book + " " + r.chapter + ":" + r.verse));
+    var txt = el("span","search-result-text");
+    txt.appendChild(highlightMatches(r.text, query));
+    row.appendChild(txt);
+    row.addEventListener("click", function(){
+      closeSearchPanel();
+      openChapter(r.book, r.chapter);
+      var vEl = $("v-" + r.verse);
+      if (vEl){
+        vEl.scrollIntoView({behavior:"smooth", block:"center"});
+        vEl.classList.add("verse-flash");
+        setTimeout(function(){ vEl.classList.remove("verse-flash"); }, 2000);
+      }
+    });
+    list.appendChild(row);
+  });
+}
+
+function openSearchPanel(){
+  $("searchInput").value = "";
+  $("searchStatus").textContent = "";
+  $("searchResults").innerHTML = "";
+  $("overlay3").classList.add("open");
+  $("searchInput").focus();
+}
+function closeSearchPanel(){
+  $("overlay3").classList.remove("open");
+}
+
+/* ============================================================
    Keep-awake (Wake Lock API) — best-effort, silently no-ops where unsupported
    ============================================================ */
 var wakeLockSentinel = null;
@@ -1032,6 +1205,7 @@ function refreshOfflineStatusMessage(){
     updateOfflineStatus("Offline mode is active. Use \u201cSave for Offline\u201d to pre-load the whole Bible and every illustration.");
   }
 }
+var downloadForOfflineHandler = null;
 function downloadForOffline(){
   if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
   var urls = [KJV_LOCAL_URL];
@@ -1040,13 +1214,16 @@ function downloadForOffline(){
     urls.push(commonsUrl(ART[key].f, 480));
   });
   updateOfflineStatus("Saving " + urls.length + " files for offline use\u2026");
+  if (downloadForOfflineHandler) navigator.serviceWorker.removeEventListener("message", downloadForOfflineHandler);
   navigator.serviceWorker.controller.postMessage({type:"CACHE_URLS", urls:urls});
-  navigator.serviceWorker.addEventListener("message", function handler(ev){
+  downloadForOfflineHandler = function handler(ev){
     if (ev.data && ev.data.type==="CACHE_URLS_DONE"){
       updateOfflineStatus("Saved. The whole Bible and every illustration will now work with no connection.");
       navigator.serviceWorker.removeEventListener("message", handler);
+      downloadForOfflineHandler = null;
     }
-  });
+  };
+  navigator.serviceWorker.addEventListener("message", downloadForOfflineHandler);
 }
 function clearOfflineData(){
   if (!("caches" in window)){ return; }
@@ -1090,6 +1267,7 @@ function seekFractionForVerse(book, chapter, verse){
 }
 
 var persistentAudio = null; // survives across chapter re-renders when the underlying file hasn't changed
+var narrationDownloadHandler = null; // pending service-worker message listener, so re-clicking doesn't stack listeners
 
 function buildNarrationPlayer(book, chapter){
   var match = findLibrivoxFile(book, chapter);
@@ -1134,13 +1312,16 @@ function buildNarrationPlayer(book, chapter){
   dl.addEventListener("click", function(){
     if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
     dl.disabled = true; dl.textContent = "Saving\u2026";
+    if (narrationDownloadHandler) navigator.serviceWorker.removeEventListener("message", narrationDownloadHandler);
     navigator.serviceWorker.controller.postMessage({type:"CACHE_URLS", urls:[LIBRIVOX_BASE + match.file]});
-    navigator.serviceWorker.addEventListener("message", function handler(ev){
+    narrationDownloadHandler = function handler(ev){
       if (ev.data && ev.data.type==="CACHE_URLS_DONE"){
         dl.textContent = "Saved for offline \u2713";
         navigator.serviceWorker.removeEventListener("message", handler);
+        narrationDownloadHandler = null;
       }
-    });
+    };
+    navigator.serviceWorker.addEventListener("message", narrationDownloadHandler);
   });
   wrap.appendChild(dl);
 
@@ -1235,7 +1416,6 @@ function setMusicVolume(v){
   state.musicVol=v;
   if (musicGain) musicGain.gain.value=v;
   var t = $("musicTrackAudio"); if (t) t.volume = v;
-  saveState();
 }
 
 /* Real public-domain piano hymn recordings, alongside the synthesized
@@ -1330,6 +1510,7 @@ function initSettingsUI(){
     if (state.musicOn && v>0){ if (t) t.play().catch(function(){}); else if (state.musicTrack==="drone") startAmbient(); }
     else { if (t) t.pause(); stopAmbient(); }
   });
+  $("musicVolRange").addEventListener("change", function(){ saveState(); });
   $("musicOnCheck").addEventListener("change", function(e){
     state.musicOn = e.target.checked; saveState();
     var t = $("musicTrackAudio");
@@ -1340,15 +1521,17 @@ function initSettingsUI(){
     playMusicTrack(e.target.value);
   });
   $("narrVolRange").addEventListener("input", function(e){
-    state.narrVol=parseFloat(e.target.value); saveState();
+    state.narrVol=parseFloat(e.target.value);
     $("narrVolLbl").textContent = Math.round(state.narrVol*100)+"%";
     var a = $("librivoxAudio"); if (a) a.volume = state.narrVol;
   });
+  $("narrVolRange").addEventListener("change", function(){ saveState(); });
   $("narrRateRange").addEventListener("input", function(e){
-    state.narrRate=parseFloat(e.target.value); saveState();
+    state.narrRate=parseFloat(e.target.value);
     $("narrRateLbl").textContent = state.narrRate.toFixed(2)+"\u00d7";
     var a = $("librivoxAudio"); if (a) a.playbackRate = state.narrRate;
   });
+  $("narrRateRange").addEventListener("change", function(){ saveState(); });
   $("narrSourceSelect").addEventListener("change", function(e){
     state.narrSource = e.target.value; saveState();
   });
@@ -1398,6 +1581,15 @@ function initSettingsUI(){
   $("closeBookmarks").addEventListener("click", function(){ $("overlay2").classList.remove("open"); });
   $("overlay2").addEventListener("click", function(e){ if (e.target.id==="overlay2") $("overlay2").classList.remove("open"); });
 
+  $("searchBtn").addEventListener("click", openSearchPanel);
+  $("closeSearch").addEventListener("click", closeSearchPanel);
+  $("overlay3").addEventListener("click", function(e){ if (e.target.id==="overlay3") closeSearchPanel(); });
+  $("searchInput").addEventListener("input", function(e){
+    var val = e.target.value;
+    clearTimeout(searchDebounceTimer);
+    searchDebounceTimer = setTimeout(function(){ renderSearchResults(val); }, 250);
+  });
+
   $("artToggleBtn").addEventListener("click", function(){
     state.showArt = !state.showArt; saveState();
     $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
@@ -1418,6 +1610,18 @@ function initSettingsUI(){
       if ($("nav").classList.contains("open")) closeNav();
       else if ($("overlay").classList.contains("open")) $("overlay").classList.remove("open");
       else if ($("overlay2").classList.contains("open")) $("overlay2").classList.remove("open");
+      else if ($("overlay3").classList.contains("open")) closeSearchPanel();
+      return;
+    }
+    if (e.key==="ArrowRight" || e.key==="ArrowLeft"){
+      if (e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return; /* Alt+Left is browser Back, etc. */
+      var t = e.target, tag = t && t.tagName;
+      if (tag==="INPUT" || tag==="TEXTAREA" || tag==="SELECT" || (t && t.isContentEditable)) return;
+      if ($("nav").classList.contains("open")) return;
+      if ($("overlay").classList.contains("open")) return;
+      if ($("overlay2").classList.contains("open")) return;
+      if ($("overlay3").classList.contains("open")) return;
+      if (navigateChapter(e.key==="ArrowRight" ? 1 : -1)) e.preventDefault();
     }
   });
   if (window.innerWidth<=820) $("navToggle").style.display="";
