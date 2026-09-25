@@ -8,11 +8,12 @@
    still works, it just won't be installable or offline-capable until
    it's hosted somewhere real. */
 
-var CACHE_NAME = "kjv1611-v1";
+var CACHE_NAME = "kjv1611-v2";
 var APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./data/kjv.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
@@ -35,9 +36,23 @@ self.addEventListener("activate", function(event){
   self.clients.claim();
 });
 
+/* Audio (narration, hymns) is large: never cache it just because it played.
+   It is only served from cache if the user saved it with the download button. */
+function isAudio(req){
+  return req.destination === "audio" || req.destination === "video" ||
+         req.headers.has("range") || /\.(mp3|ogg|m4a|wav)(\?|$)/i.test(req.url);
+}
+
 self.addEventListener("fetch", function(event){
   var req = event.request;
   if (req.method !== "GET") return;
+
+  if (isAudio(req)){
+    event.respondWith(
+      caches.match(req.url).then(function(cached){ return cached || fetch(req); })
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(req).then(function(cached){

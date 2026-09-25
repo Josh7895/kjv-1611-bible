@@ -2,11 +2,12 @@
 
 A single HTML file, now a full PWA. Works two ways:
 
-**Quick use:** double-click the file, opens in any browser.
+**Quick use:** double-click `index.html`, opens in any browser (the text then
+loads from the online source, since browsers block local file reads).
 
 **Full experience (installable + offline):** put these files together on
 free static hosting (e.g. GitHub Pages) and open it from there:
-`index.html`, `manifest.json`, `service-worker.js`, `icons/` folder.
+`index.html`, `manifest.json`, `service-worker.js`, `data/` and `icons/` folders.
 Service workers only activate on `https://` (never on a local double-clicked
 file), so installing to your home screen and offline mode both need it
 hosted somewhere — GitHub Pages is free and takes about five minutes:
@@ -16,7 +17,9 @@ install icon (desktop Chrome/Edge) — it now behaves like a real app.
 
 ## What's real vs. generated
 
-- **Text**: standard KJV, fetched live from a public-domain source.
+- **Text**: standard KJV (public domain), bundled as `data/kjv.json`
+  (66 books, 31,102 verses, from midvash/bible-data). The live GitHub copy
+  is only a fallback.
 - **Illustrations**: ~30 real 1866 Gustave Doré engravings, individually
   verified on Wikimedia Commons (their policy bans watermarked PD scans).
 - **Narration**: real human narration — the complete public-domain
@@ -32,6 +35,7 @@ Bookmarks (star icon), adjustable font + font family, light/dark
 (Parchment / Candlelit Stone), verse-number toggle, swipe to turn pages,
 keep-screen-on while reading, "Save for Offline" (caches the text + all
 art; narration saves per-recording via the button under the player).
+Audio is never cached just because it played, only when you save it.
 
 ## Known limits
 

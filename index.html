@@ -517,6 +517,7 @@ ul.book-list li{ margin:0; }
 /* ============================================================
    Data sources
    ============================================================ */
+var KJV_LOCAL_URL = "data/kjv.json";
 var KJV_URL = "https://raw.githubusercontent.com/midvash/bible-data/main/versions/en/kjv/kjv.json";
 
 /* Real 19th-century Gustave Doré engravings (public domain, 1866), hosted on
@@ -765,11 +766,16 @@ function $(id){ return document.getElementById(id); }
 /* ============================================================
    Fetch & parse the KJV text (public-domain, midvash/bible-data)
    ============================================================ */
-function loadBible(){
-  return fetch(KJV_URL).then(function(res){
+function fetchJson(url){
+  return fetch(url).then(function(res){
     if (!res.ok) throw new Error("network response was not ok (" + res.status + ")");
     return res.json();
-  }).then(function(raw){
+  });
+}
+function loadBible(){
+  /* Bundled copy first; the live source is only a fallback (and the only
+     option when opened as a local file, where browsers block local fetches). */
+  return fetchJson(KJV_LOCAL_URL).catch(function(){ return fetchJson(KJV_URL); }).then(function(raw){
     var books = raw.books.slice().sort(function(a,b){ return (a.bookId||0)-(b.bookId||0); });
     BIBLE = {}; BOOK_ORDER = [];
     books.forEach(function(b){
@@ -1026,7 +1032,7 @@ function refreshOfflineStatusMessage(){
 }
 function downloadForOffline(){
   if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
-  var urls = [KJV_URL];
+  var urls = [KJV_LOCAL_URL];
   Object.keys(ART).forEach(function(key){
     urls.push(commonsUrl(ART[key].f, 700));
     urls.push(commonsUrl(ART[key].f, 480));
