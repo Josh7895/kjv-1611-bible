@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-iUHfU3K/3Wci47d/ccN2IElfGQO2wntA+/NJn5KDJIE='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-t7g2yX+im610i0TXKLNjdRU5X/6B/5dDx1kUdur28hE='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -1224,13 +1224,13 @@ function openChapter(book, chapter){
     if (art){
       var artWidth = window.innerWidth<=820 ? 480 : 700;
       img.src = commonsUrl(art.f, artWidth); img.alt = art.t;
-      cap.textContent = art.t + " — engraven by G. Doré, 1866";
+      cap.textContent = art.t + " \u2014 engraven by G. Dor\u00e9, 1866";
       /* No connection to Wikimedia (offline, or blocked): show the drawing. */
       img.onerror = function(){
         if (drawn) showDrawn();
         else {
           artPanel.innerHTML = "";
-          artPanel.appendChild(el("div","art-error","(Illustration failed to load — check your connection.)"));
+          artPanel.appendChild(el("div","art-error","(Illustration failed to load \u2014 check your connection.)"));
         }
       };
     } else {
