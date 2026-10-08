@@ -15,6 +15,35 @@ create a repo, upload these files, turn on Pages in repo settings, done.
 Once hosted, open it once online, then "Add to Home Screen" (phone) or
 install icon (desktop Chrome/Edge) — it now behaves like a real app.
 
+## On iPhone and Android
+
+Open the hosted app in Safari (iPhone) or Chrome/Brave (Android), then:
+
+- **iPhone / iPad**: tap Share, then **Add to Home Screen**. The app shows a
+  one-time tip explaining this.
+- **Android, desktop Chrome/Edge/Brave**: tap **Install** on the tip at the top
+  (or Install app in the browser menu).
+
+It then opens full screen from its own icon, keeps clear of the notch, and
+works offline. A true App Store app would need a Mac, Xcode and a paid Apple
+developer account to wrap this same site; nothing here prevents that later.
+
+## Accounts (optional)
+
+The Account button lets people create an account with an email and
+password. Signing in keeps bookmarks, chapter notes, reading place, chapters
+read and settings in sync across devices; the app is fully usable without
+it. Sign-in uses Supabase and is off until its public keys are added; see
+[SETUP-LOGIN.md](SETUP-LOGIN.md).
+
+## Testing
+
+`node tests/app.test.js` opens the app in a headless browser at iPhone and
+Android sizes and walks through reading, notes, sign-up, sign-in, sync
+between two devices, sign-out, email links and account deletion, against a
+stand-in for Supabase. It runs on every pull request (`.github/workflows/app-check.yml`).
+Needs `npm install --no-save playwright && npx playwright install chromium`.
+
 ## What's real vs. generated
 
 - **Text**: standard KJV (public domain), bundled as `data/kjv.json`
@@ -31,7 +60,7 @@ install icon (desktop Chrome/Edge) — it now behaves like a real app.
 
 ## Features
 
-Bookmarks (star icon), adjustable font + font family, light/dark
+Bookmarks (star icon), notes under every chapter, adjustable font + font family, light/dark
 (Parchment / Candlelit Stone), verse-number toggle, swipe to turn pages,
 keep-screen-on while reading, "Save for Offline" (caches the text + all
 art; narration saves per-recording via the button under the player).

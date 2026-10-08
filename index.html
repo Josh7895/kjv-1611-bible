@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EUw67cIKwSmmjFTZDkc1CVd1cfuwAkeZ/CglJeO1oHY='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6hnOXyD7Aw2SVlT2oxi3ssV5W/nODPFsncbSp8DCQsg='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -399,6 +399,96 @@ ul.book-list li{ margin:0; }
 #navBackdrop{
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:55;
 }
+
+/* ---- iPhone / home-screen app: keep content clear of the notch and status bar ---- */
+[hidden]{ display:none !important; }
+#reader-wrap{ padding-top:max(34px, calc(env(safe-area-inset-top) + 12px)); }
+#nav{ padding-top:max(22px, calc(env(safe-area-inset-top) + 12px)); }
+.install-tip{
+  width:100%; max-width:900px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin:0 0 14px; padding:12px 14px; background:var(--panel-bg); border:1px solid var(--rule);
+  color:var(--ink); font-family:'IM Fell English', serif; font-size:16px; line-height:1.4;
+}
+.install-tip span{ flex:1 1 220px; }
+.install-tip button{
+  min-height:44px; padding:8px 14px; border:1px solid var(--rule); background:none; color:var(--ink);
+  font-family:'IM Fell English SC', serif; font-size:14px; letter-spacing:.05em; cursor:pointer;
+}
+.install-tip button.primary{ background:var(--rubric); border-color:var(--rubric); color:#fbe9d9; }
+
+/* ---- Notes under each chapter (part of the page, never on top of it) ---- */
+.chapter-note{ max-width:640px; margin:30px auto 0; border-top:1px solid var(--rule); padding-top:14px; }
+.chapter-note summary{
+  cursor:pointer; min-height:44px; display:flex; align-items:center; gap:8px;
+  font-family:'IM Fell English SC', serif; font-size:16px; letter-spacing:.05em; color:var(--rubric);
+}
+.chapter-note textarea{
+  width:100%; min-height:120px; margin-top:8px; padding:10px 12px; resize:vertical;
+  font-family:'IM Fell English', Georgia, serif; font-size:17px; line-height:1.5;
+  background:rgba(255,255,255,.35); color:var(--ink); border:1px solid var(--rule); border-radius:3px;
+}
+[data-theme="stone"] .chapter-note textarea{ background:rgba(0,0,0,.25); }
+.chapter-note .note-saved{ font-family:'IM Fell English', serif; font-style:italic; font-size:13px; color:var(--ink-soft); margin-top:4px; min-height:1.2em; }
+#notesList h3{
+  font-family:'IM Fell English SC', serif; color:var(--rubric); font-size:16px; letter-spacing:.06em;
+  margin:22px 0 4px; text-align:center;
+}
+.note-preview{ display:block; font-size:13px; color:var(--ink-soft); font-style:italic; margin-top:2px; }
+
+/* ---- Account & sync panel (shares overlay pattern with settings) ---- */
+#overlay4{
+  position:fixed; inset:0; background:rgba(0,0,0,.55); display:none;
+  align-items:center; justify-content:center; z-index:50;
+}
+#overlay4.open{ display:flex; }
+#accountPanel{
+  width:440px; max-width:94vw; max-height:88vh; max-height:88dvh; overflow-y:auto;
+  background:var(--panel-bg); border:1px solid var(--rule); box-shadow:0 20px 60px rgba(0,0,0,.6);
+  padding:26px 26px 22px; color:var(--ink); font-family:'IM Fell English', serif;
+}
+#accountPanel h2{
+  font-family:'UnifrakturMaguntia', serif; color:var(--rubric); margin:0 0 10px; font-size:28px; text-align:center;
+}
+.account-intro{ font-size:16px; line-height:1.5; margin:0 0 14px; }
+.account-msg{ font-size:16px; line-height:1.45; margin:0 0 12px; padding:10px 12px; border-left:4px solid var(--gold); background:rgba(0,0,0,.04); }
+.account-msg:empty{ display:none; }
+.account-msg.error{ border-left-color:var(--rubric); }
+#accountPanel label.field{ display:block; font-family:'IM Fell English SC', serif; font-size:15px; letter-spacing:.04em; margin:10px 0 4px; }
+#accountPanel input[type=email], #accountPanel input[type=password]{
+  width:100%; min-height:46px; padding:10px 12px; font-size:17px; font-family:-apple-system, Segoe UI, Roboto, sans-serif;
+  background:var(--parchment); color:var(--ink); border:1px solid var(--rule); border-radius:4px;
+}
+.account-btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.account-btns button, .account-wide{
+  flex:1 1 140px; min-height:48px; padding:10px 14px; cursor:pointer; border-radius:4px;
+  font-family:'IM Fell English SC', serif; font-size:16px; letter-spacing:.05em;
+  background:none; color:var(--ink); border:1px solid var(--rule);
+}
+.account-btns button.primary{ background:var(--rubric); color:#fbe9d9; border-color:var(--rubric); }
+.account-btns button:disabled{ opacity:.6; cursor:default; }
+.linkbtn{
+  background:none; border:none; padding:10px 0; min-height:44px; cursor:pointer; color:var(--rubric);
+  font-family:'IM Fell English', serif; font-size:15px; text-decoration:underline;
+}
+.account-facts{ font-size:16px; line-height:1.6; margin:0 0 6px; }
+.account-facts b{ word-break:break-all; }
+.account-check{ display:flex; gap:10px; align-items:flex-start; font-size:15px; margin-top:12px; cursor:pointer; }
+.account-check input{ width:22px; height:22px; flex:0 0 22px; margin:0; }
+.danger-zone{ border-top:1px solid var(--rule); margin-top:18px; padding-top:8px; }
+.danger-zone .account-btns button.primary{ background:#7a1010; }
+#closeAccount{
+  width:100%; margin-top:16px; min-height:48px; padding:10px; background:var(--rubric); color:#fbe9d9; border:none;
+  font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:15px; cursor:pointer;
+}
+/* Phones: the Index button gets its own line and every action keeps a full-size tap target. */
+@media (max-width: 520px){
+  #reader-wrap{ padding-left:max(12px, env(safe-area-inset-left)); padding-right:max(12px, env(safe-area-inset-right)); }
+  #topbar{ flex-wrap:wrap; gap:8px; }
+  #topbar .actions{ width:100%; justify-content:space-between; }
+  #topbar .iconbtn{ min-width:44px; min-height:44px; padding:8px 6px; font-size:18px; }
+  #navToggle{ min-height:44px; font-size:15px; }
+}
+#accountBtn.signed-in{ border-color:var(--gold); box-shadow:inset 0 -3px 0 var(--gold); }
 </style>
 </head>
 <body data-theme="parchment">
@@ -424,8 +514,15 @@ ul.book-list li{ margin:0; }
         <button class="iconbtn" id="searchBtn" aria-label="Search the Bible">&#128269;<span class="btn-label">&nbsp;Search</span></button>
         <button class="iconbtn" id="readAloudBtn" aria-label="Read aloud">&#9835;<span class="btn-label">&nbsp;Read Aloud</span></button>
         <button class="iconbtn" id="artToggleBtn" aria-label="Toggle illustrations">&#127912;<span class="btn-label">Illustrations</span></button>
+        <button class="iconbtn" id="accountBtn" aria-label="Account and sync">&#128100;<span class="btn-label">&nbsp;Account</span></button>
         <button class="iconbtn" id="settingsBtn" aria-label="Settings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
       </div>
+    </div>
+
+    <div class="install-tip" id="installTip" hidden>
+      <span id="installTipText"></span>
+      <button class="primary" id="installTipBtn" hidden>Install</button>
+      <button id="installTipClose">Got it</button>
     </div>
 
     <div class="page" id="pageEl">
@@ -550,8 +647,9 @@ ul.book-list li{ margin:0; }
       playlist stream from archive.org, the engravings load from Wikimedia
       Commons, and the fonts from Google Fonts &mdash; those services see
       your IP address when they send these files, as any website does. The
-      ambient drone is generated in your browser, and your settings and
-      bookmarks are stored only on this device.
+      ambient drone is generated in your browser, and your settings,
+      bookmarks and notes are stored on this device. If you sign in (Account),
+      they are also kept in your account so your other devices can use them.
     </div>
   </div>
 </div>
@@ -560,6 +658,7 @@ ul.book-list li{ margin:0; }
   <div id="bookmarksPanel">
     <h2>Bookmarks</h2>
     <div id="bookmarksList"></div>
+    <div id="notesList"></div>
     <button id="closeBookmarks">Close</button>
   </div>
 </div>
@@ -571,6 +670,62 @@ ul.book-list li{ margin:0; }
     <div class="search-status" id="searchStatus"></div>
     <div id="searchResults"></div>
     <button id="closeSearch">Close</button>
+  </div>
+</div>
+
+<div id="overlay4">
+  <div id="accountPanel" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <h2 id="accountTitle">Your Account</h2>
+    <p class="account-intro" id="accountIntro">You can read, listen and save bookmarks without an account.
+      Sign in to keep your bookmarks, notes, reading place and settings the same on your phone, tablet and computer.</p>
+    <div class="account-msg" id="accountMsg" role="status" aria-live="polite"></div>
+
+    <div id="accountOff" hidden>
+      <p class="account-intro">Sign-in is not switched on for this copy of the app yet.
+        Everything still works, and your bookmarks, notes and settings are saved on this device.</p>
+    </div>
+
+    <form id="signInForm" hidden novalidate>
+      <label class="field" for="authEmail">Email</label>
+      <input type="email" id="authEmail" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" required>
+      <label class="field" for="authPassword">Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+      <label class="account-check"><input type="checkbox" id="showPassword"><span>Show password</span></label>
+      <div class="account-btns">
+        <button type="submit" class="primary" id="signInBtn">Sign In</button>
+        <button type="button" id="signUpBtn">Create Account</button>
+      </div>
+      <button type="button" class="linkbtn" id="forgotBtn">Forgot your password?</button>
+    </form>
+
+    <form id="newPasswordForm" hidden novalidate>
+      <label class="field" for="newPassword">Choose a new password</label>
+      <input type="password" id="newPassword" autocomplete="new-password" minlength="6" required>
+      <div class="account-btns"><button type="submit" class="primary" id="savePasswordBtn">Save New Password</button></div>
+    </form>
+
+    <div id="signedInBox" hidden>
+      <p class="account-facts">Signed in as <b id="accountEmail"></b></p>
+      <p class="account-facts" id="syncStatus"></p>
+      <div class="account-btns">
+        <button type="button" class="primary" id="syncNowBtn">Sync Now</button>
+        <button type="button" id="signOutBtn">Sign Out</button>
+      </div>
+      <label class="account-check"><input type="checkbox" id="signOutWipe"><span>When I sign out, also remove my bookmarks, notes and reading place from this device (for shared phones and tablets)</span></label>
+      <div class="danger-zone">
+        <button type="button" class="linkbtn" id="deleteAccountBtn">Delete my account&hellip;</button>
+        <div id="deleteConfirm" hidden>
+          <p class="account-facts">This permanently deletes your account and the copy of your bookmarks, notes and settings kept with it. This device keeps its own copy.</p>
+          <div class="account-btns">
+            <button type="button" class="primary" id="deleteYesBtn">Yes, Delete It</button>
+            <button type="button" id="deleteNoBtn">Keep My Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="account-facts" id="readingProgress"></p>
+    <button id="closeAccount">Close</button>
   </div>
 </div>
 
@@ -796,7 +951,7 @@ var state = {
   book:"Genesis", chapter:1, fontSize:22, fontFamily:"blackletter", theme:"parchment",
   showArt:true, showVerseNum:true, musicVol:0.15, musicOn:true, musicTrack:"drone",
   narrVol:1, narrRate:0.85, narrVoice:"", narrSource:"auto", autoRead:false, swipeEnabled:true, wakeLock:false,
-  bookmarks:[]
+  bookmarks:[], notes:{}, readChapters:{}
 };
 
 function loadState(){
@@ -815,6 +970,7 @@ function loadState(){
 }
 function saveState(){
   try{ localStorage.setItem("kjv1611-settings", JSON.stringify(state)); }catch(e){}
+  noteLocalChange();
 }
 
 /* ============================================================
@@ -941,6 +1097,7 @@ function closeNav(){
    ============================================================ */
 function openChapter(book, chapter){
   if (!BIBLE[book] || !BIBLE[book][chapter]) return;
+  markChapterRead(book, Number(chapter));
   state.book=book; state.chapter=Number(chapter); saveState();
 
   var verses = BIBLE[book][chapter];
@@ -1011,6 +1168,7 @@ function openChapter(book, chapter){
   foot.appendChild(prevBtn);
   foot.appendChild(el("div","folio", book+" "+toRoman(chapter)));
   foot.appendChild(nextBtn);
+  body.appendChild(buildChapterNote(book, state.chapter));
   body.appendChild(foot);
 
   updateNavHighlight();
@@ -1501,7 +1659,8 @@ function applyFontSize(){
   var s = $("pageBody").querySelector(".scripture");
   if (s) s.style.setProperty("--fs", state.fontSize+"px");
 }
-function initSettingsUI(){
+/* Puts every settings control in step with state (also after a sync). */
+function refreshSettingsUI(){
   $("musicVolRange").value = state.musicVol;
   $("musicVolLbl").textContent = Math.round(state.musicVol*100)+"%";
   $("musicOnCheck").checked = state.musicOn;
@@ -1529,6 +1688,10 @@ function initSettingsUI(){
   applyFontFamily();
   applyWakeLock();
   refreshOfflineStatusMessage();
+  $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
+}
+function initSettingsUI(){
+  refreshSettingsUI();
 
   $("musicVolRange").addEventListener("input", function(e){
     var v=parseFloat(e.target.value); setMusicVolume(v);
@@ -1604,7 +1767,7 @@ function initSettingsUI(){
   $("overlay").addEventListener("click", function(e){ if (e.target.id==="overlay") $("overlay").classList.remove("open"); });
 
   $("bookmarkBtn").addEventListener("click", toggleBookmark);
-  $("bookmarksListBtn").addEventListener("click", function(){ renderBookmarksList(); $("overlay2").classList.add("open"); });
+  $("bookmarksListBtn").addEventListener("click", function(){ renderBookmarksList(); renderNotesList(); $("overlay2").classList.add("open"); });
   $("closeBookmarks").addEventListener("click", function(){ $("overlay2").classList.remove("open"); });
   $("overlay2").addEventListener("click", function(e){ if (e.target.id==="overlay2") $("overlay2").classList.remove("open"); });
 
@@ -1638,6 +1801,7 @@ function initSettingsUI(){
       else if ($("overlay").classList.contains("open")) $("overlay").classList.remove("open");
       else if ($("overlay2").classList.contains("open")) $("overlay2").classList.remove("open");
       else if ($("overlay3").classList.contains("open")) closeSearchPanel();
+      else if ($("overlay4").classList.contains("open")) closeAccountPanel();
       return;
     }
     if (e.key==="ArrowRight" || e.key==="ArrowLeft"){
@@ -1648,6 +1812,7 @@ function initSettingsUI(){
       if ($("overlay").classList.contains("open")) return;
       if ($("overlay2").classList.contains("open")) return;
       if ($("overlay3").classList.contains("open")) return;
+      if ($("overlay4").classList.contains("open")) return;
       if (navigateChapter(e.key==="ArrowRight" ? 1 : -1)) e.preventDefault();
     }
   });
@@ -1680,11 +1845,643 @@ function initSettingsUI(){
 }
 
 /* ============================================================
+   Notes and reading progress
+   ============================================================ */
+function chapterKey(book, chapter){ return book + " " + chapter; }
+function markChapterRead(book, chapter){
+  var k = chapterKey(book, chapter);
+  if (!state.readChapters[k]) state.readChapters[k] = Date.now();
+}
+function countChapters(){
+  var n = 0;
+  BOOK_ORDER.forEach(function(b){ n += Object.keys(BIBLE[b]).length; });
+  return n;
+}
+function noteText(book, chapter){
+  var n = state.notes[chapterKey(book, chapter)];
+  return n && typeof n.t === "string" ? n.t : "";
+}
+var noteSaveTimer = null;
+function buildChapterNote(book, chapter){
+  var box = document.createElement("details");
+  box.className = "chapter-note";
+  var text = noteText(book, chapter);
+  box.open = !!text;
+  var sum = el("summary", "", "✎  My notes on this chapter");
+  var area = document.createElement("textarea");
+  area.id = "chapterNoteText";
+  area.setAttribute("aria-label", "My notes on " + book + " " + chapter);
+  area.placeholder = "Write a thought, a prayer or a question…";
+  area.value = text;
+  var saved = el("div", "note-saved");
+  saved.setAttribute("aria-live", "polite");
+  area.addEventListener("input", function(){
+    saved.textContent = "";
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = setTimeout(function(){
+      /* An emptied note stays as a dated blank, so the deletion syncs too. */
+      state.notes[chapterKey(book, chapter)] = {t: area.value.trim() ? area.value : "", ts: Date.now()};
+      saveState();
+      saved.textContent = "Saved.";
+    }, 600);
+  });
+  box.appendChild(sum);
+  box.appendChild(area);
+  box.appendChild(saved);
+  return box;
+}
+function renderNotesList(){
+  var list = $("notesList");
+  list.innerHTML = "";
+  var keys = Object.keys(state.notes).filter(function(k){
+    var n = state.notes[k], i = k.lastIndexOf(" ");
+    return n && n.t && BIBLE && BIBLE[k.slice(0, i)] && BIBLE[k.slice(0, i)][k.slice(i + 1)];
+  }).sort(function(a, b){ return state.notes[b].ts - state.notes[a].ts; });
+  if (!keys.length) return;
+  list.appendChild(el("h3", "", "My Notes"));
+  keys.forEach(function(k){
+    var i = k.lastIndexOf(" "), book = k.slice(0, i), chapter = Number(k.slice(i + 1));
+    var row = el("div", "bookmark-row");
+    var link = el("button", "bookmark-link");
+    link.appendChild(document.createTextNode(book + " " + toRoman(chapter)));
+    var t = state.notes[k].t;
+    link.appendChild(el("span", "note-preview", t.length > 80 ? t.slice(0, 80) + "…" : t));
+    link.addEventListener("click", function(){
+      $("overlay2").classList.remove("open");
+      openChapter(book, chapter);
+    });
+    row.appendChild(link);
+    list.appendChild(row);
+  });
+}
+
+/* ============================================================
+   Account & sync (optional)
+   Sign-in uses Supabase Auth; each account keeps one row in the
+   reader_data table holding bookmarks, notes, reading place and
+   settings. Everything works without an account; signing in only
+   adds a copy that the same person's other devices merge with.
+   Keys live in auth-config.json (public "anon" key only).
+   ============================================================ */
+var AUTH_KEY = "kjv1611-auth", SYNC_KEY = "kjv1611-sync";
+/* State that isn't a plain setting (or is particular to one device). */
+var SYNC_SKIP = {book:1, chapter:1, bookmarks:1, notes:1, readChapters:1, narrVoice:1};
+var authConfig = null, session = null;
+var syncMeta = {settingsTs:0, progressTs:0, tombs:{}, lastSync:0};
+var lastFingerprint = null, syncTimer = null, syncInFlight = null, syncQueued = false;
+var refreshInFlight = null, firstSyncPending = true;
+
+function loadJson(key){
+  try{ var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function storeJson(key, value){
+  try{
+    if (value == null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  }catch(e){}
+}
+function saveSyncMeta(){ storeJson(SYNC_KEY, syncMeta); }
+function saveSession(){ storeJson(AUTH_KEY, session); }
+
+function settingsSnapshot(){
+  var o = {};
+  for (var k in state) if (!SYNC_SKIP[k]) o[k] = state[k];
+  return o;
+}
+function bookmarkKey(b){ return chapterKey(b.book, b.chapter); }
+function takeFingerprint(){
+  return {s: JSON.stringify(settingsSnapshot()), p: chapterKey(state.book, state.chapter),
+          b: state.bookmarks.map(bookmarkKey), n: JSON.stringify(state.notes)};
+}
+/* Called by saveState: dates whatever changed, so the newest edit wins a sync. */
+function noteLocalChange(){
+  var fp = takeFingerprint(), old = lastFingerprint, now = Date.now(), changed = false;
+  lastFingerprint = fp;
+  if (!old) return;
+  if (fp.s !== old.s){ syncMeta.settingsTs = now; changed = true; }
+  if (fp.p !== old.p){ syncMeta.progressTs = now; changed = true; }
+  if (fp.n !== old.n) changed = true;
+  old.b.forEach(function(k){ if (fp.b.indexOf(k) < 0){ syncMeta.tombs[k] = now; changed = true; } });
+  fp.b.forEach(function(k){ if (old.b.indexOf(k) < 0){ delete syncMeta.tombs[k]; changed = true; } });
+  if (!changed) return;
+  saveSyncMeta();
+  scheduleSync(2500);
+}
+
+/* ---- Merging: per item, the newest change wins ---- */
+function validChapter(book, chapter){
+  return !!(BIBLE && BIBLE[book] && BIBLE[book][chapter]);
+}
+function splitKey(k){
+  var i = String(k).lastIndexOf(" ");
+  return {book: String(k).slice(0, i), chapter: Number(String(k).slice(i + 1))};
+}
+function num(v){ return typeof v === "number" && isFinite(v) ? v : 0; }
+function buildDoc(){
+  var bookmarks = {};
+  Object.keys(syncMeta.tombs).forEach(function(k){ bookmarks[k] = {ts: syncMeta.tombs[k], del: true}; });
+  state.bookmarks.forEach(function(b){ bookmarks[bookmarkKey(b)] = {ts: num(b.ts)}; });
+  return {
+    v: 1,
+    settings: {ts: syncMeta.settingsTs, data: settingsSnapshot()},
+    progress: {ts: syncMeta.progressTs, book: state.book, chapter: state.chapter},
+    bookmarks: bookmarks,
+    notes: state.notes,
+    read: state.readChapters
+  };
+}
+function mergeDocs(local, remote){
+  if (!remote || typeof remote !== "object") return local;
+  var out = {v: 1, settings: local.settings, progress: local.progress, bookmarks: {}, notes: {}, read: {}};
+  if (remote.settings && num(remote.settings.ts) > num(local.settings.ts) && remote.settings.data &&
+      typeof remote.settings.data === "object") out.settings = remote.settings;
+  var rp = remote.progress;
+  if (rp && num(rp.ts) > num(local.progress.ts) && validChapter(rp.book, rp.chapter)) out.progress = rp;
+  function newest(field, ok){
+    [local[field], remote[field]].forEach(function(map){
+      if (!map || typeof map !== "object") return;
+      Object.keys(map).forEach(function(k){
+        var item = map[k], p = splitKey(k);
+        if (!validChapter(p.book, p.chapter) || !ok(item)) return;
+        var cur = out[field][k];
+        if (!cur || num(item.ts) > num(cur.ts)) out[field][k] = item;
+      });
+    });
+  }
+  newest("bookmarks", function(b){ return b && typeof b === "object"; });
+  newest("notes", function(n){ return n && typeof n === "object" && typeof n.t === "string"; });
+  /* Chapters read: keep the earliest date, and every chapter either side has read. */
+  [local.read, remote.read].forEach(function(map){
+    if (!map || typeof map !== "object") return;
+    Object.keys(map).forEach(function(k){
+      var p = splitKey(k), t = num(map[k]);
+      if (!t || !validChapter(p.book, p.chapter)) return;
+      if (!out.read[k] || t < out.read[k]) out.read[k] = t;
+    });
+  });
+  return out;
+}
+/* Puts a merged copy into effect on this device. */
+function applyDoc(doc, mayJump){
+  var before = {showArt: state.showArt, settings: JSON.stringify(settingsSnapshot()),
+                note: noteText(state.book, state.chapter), mark: isBookmarked(state.book, state.chapter)};
+  if (num(doc.settings.ts) > syncMeta.settingsTs){
+    var data = doc.settings.data;
+    for (var k in data){
+      if (SYNC_SKIP[k] || !(k in state)) continue;
+      if (typeof data[k] !== typeof state[k] || (typeof data[k] === "number" && !isFinite(data[k]))) continue;
+      state[k] = data[k];
+    }
+    syncMeta.settingsTs = num(doc.settings.ts);
+  }
+  var live = [], tombs = {};
+  Object.keys(doc.bookmarks).forEach(function(k){
+    var b = doc.bookmarks[k], p = splitKey(k);
+    if (b.del) tombs[k] = num(b.ts);
+    else live.push({book: p.book, chapter: p.chapter, ts: num(b.ts)});
+  });
+  live.sort(function(a, b){ return b.ts - a.ts; });
+  state.bookmarks = live;
+  syncMeta.tombs = tombs;
+  state.notes = doc.notes;
+  state.readChapters = doc.read;
+  var jump = mayJump && num(doc.progress.ts) > syncMeta.progressTs &&
+    chapterKey(doc.progress.book, doc.progress.chapter) !== chapterKey(state.book, state.chapter);
+  if (jump){
+    syncMeta.progressTs = num(doc.progress.ts);
+    state.book = doc.progress.book; state.chapter = Number(doc.progress.chapter);
+  }
+  lastFingerprint = takeFingerprint(); /* merged data is not a new local edit */
+  saveState();
+  saveSyncMeta();
+
+  var settingsChanged = JSON.stringify(settingsSnapshot()) !== before.settings;
+  if (settingsChanged) refreshSettingsUI();
+  var area = $("chapterNoteText");
+  var noteChanged = noteText(state.book, state.chapter) !== before.note;
+  if (jump || state.showArt !== before.showArt || (noteChanged && area && document.activeElement !== area)){
+    openChapter(state.book, state.chapter);
+  } else {
+    if (settingsChanged){
+      applyFontSize();
+      var s = $("pageBody").querySelector(".scripture");
+      if (s) s.classList.toggle("hide-vnum", !state.showVerseNum);
+    }
+    if (isBookmarked(state.book, state.chapter) !== before.mark) updateBookmarkBtn();
+  }
+  if ($("overlay2").classList.contains("open")){ renderBookmarksList(); renderNotesList(); }
+}
+
+/* ---- Talking to the sign-in service ---- */
+function friendlyError(msg, status){
+  var m = String(msg || "");
+  if (/invalid login credentials|invalid_grant/i.test(m)) return "That email and password don't match. Check them and try again.";
+  if (/email not confirmed/i.test(m)) return "Please confirm your email first: open the link we emailed you, then sign in here.";
+  if (/already registered|already exists/i.test(m)) return "There is already an account with that email. Try Sign In, or Forgot your password.";
+  if (/password should be|weak password|at least/i.test(m)) return "Please choose a longer password (at least 6 characters).";
+  if (/rate limit|too many/i.test(m) || status === 429) return "Too many tries just now. Please wait a minute and try again.";
+  if (/failed to fetch|networkerror|load failed|network/i.test(m)) return "Couldn't reach the sign-in service. Check your internet connection.";
+  return m || "Something went wrong (error " + status + ").";
+}
+function sbRequest(path, opts, authed){
+  opts = opts || {};
+  function go(){
+    var headers = {apikey: authConfig.key};
+    if (opts.body) headers["Content-Type"] = "application/json";
+    if (opts.prefer) headers.Prefer = opts.prefer;
+    if (authed && session) headers.Authorization = "Bearer " + session.access_token;
+    return fetch(authConfig.url + path, {method: opts.method || "GET", headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined, cache: "no-store", credentials: "omit"});
+  }
+  var ready = authed ? freshToken() : Promise.resolve();
+  return ready.then(go).then(function(resp){
+    if (resp.status === 401 && authed && session) return refreshSession().then(go);
+    return resp;
+  }).then(function(resp){
+    return resp.text().then(function(text){
+      var data = null;
+      try{ data = text ? JSON.parse(text) : null; }catch(e){}
+      if (!resp.ok){
+        var raw = data && (data.msg || data.error_description || data.message || data.error);
+        var err = new Error(friendlyError(raw, resp.status));
+        err.status = resp.status;
+        throw err;
+      }
+      return data;
+    });
+  }, function(err){
+    if (err && err.status) throw err;
+    throw new Error(friendlyError(err && err.message));
+  });
+}
+function adoptSession(data){
+  if (!data || !data.access_token) return false;
+  var expiresAt = num(Number(data.expires_at)) || (Math.floor(Date.now() / 1000) + (num(Number(data.expires_in)) || 3600));
+  session = {access_token: data.access_token, refresh_token: data.refresh_token, expires_at: expiresAt,
+             user: {id: data.user && data.user.id, email: data.user && data.user.email}};
+  saveSession();
+  return true;
+}
+function refreshSession(){
+  if (refreshInFlight) return refreshInFlight;
+  if (!session || !session.refresh_token) return Promise.reject(new Error("Please sign in again."));
+  refreshInFlight = fetch(authConfig.url + "/auth/v1/token?grant_type=refresh_token", {
+    method: "POST", headers: {apikey: authConfig.key, "Content-Type": "application/json"},
+    body: JSON.stringify({refresh_token: session.refresh_token}), cache: "no-store", credentials: "omit"
+  }).then(function(resp){
+    return resp.json().catch(function(){ return null; }).then(function(data){
+      if (resp.ok && adoptSession(data)) return;
+      if (resp.status === 400 || resp.status === 401 || resp.status === 403){
+        /* The sign-in was ended elsewhere (password change, account deleted). */
+        endSession();
+        showAccountMessage("You were signed out. Please sign in again to keep syncing.", true);
+      }
+      throw new Error("Please sign in again.");
+    });
+  });
+  refreshInFlight.then(clearRefresh, clearRefresh);
+  function clearRefresh(){ refreshInFlight = null; }
+  return refreshInFlight;
+}
+function freshToken(){
+  if (session && session.expires_at - 60 < Date.now() / 1000) return refreshSession();
+  return Promise.resolve();
+}
+function endSession(){
+  session = null;
+  saveSession();
+  firstSyncPending = true;
+  clearTimeout(syncTimer);
+  renderAccount();
+}
+
+/* ---- Sync ---- */
+function scheduleSync(delay){
+  if (!session || !authConfig) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){ syncNow(false); }, delay || 0);
+}
+function syncNow(userAsked){
+  if (!session || !session.user.id || !authConfig || !BIBLE) return Promise.resolve();
+  if (syncInFlight){ syncQueued = true; return syncInFlight; }
+  clearTimeout(syncTimer);
+  setSyncStatus("Syncing…");
+  var userId = session.user.id;
+  syncInFlight = sbRequest("/rest/v1/reader_data?select=data&user_id=eq." + encodeURIComponent(userId), {}, true)
+    .then(function(rows){
+      if (!session || session.user.id !== userId) return;
+      var merged = mergeDocs(buildDoc(), rows && rows[0] ? rows[0].data : null);
+      applyDoc(merged, firstSyncPending);
+      firstSyncPending = false;
+      return sbRequest("/rest/v1/reader_data?on_conflict=user_id", {
+        method: "POST", prefer: "resolution=merge-duplicates,return=minimal",
+        body: {user_id: userId, data: buildDoc(), updated_at: new Date().toISOString()}
+      }, true).then(function(){
+        syncMeta.lastSync = Date.now(); saveSyncMeta();
+        setSyncStatus();
+      });
+    })
+    .catch(function(err){
+      if (!session) return;
+      setSyncStatus(navigator.onLine === false
+        ? "You're offline. Changes are saved on this device and will sync when you're back online."
+        : "Not synced yet: " + err.message);
+      if (userAsked) showAccountMessage("Sync didn't finish: " + err.message, true);
+    })
+    .then(function(){
+      syncInFlight = null;
+      if (syncQueued){ syncQueued = false; scheduleSync(300); }
+    });
+  return syncInFlight;
+}
+function setSyncStatus(text){
+  var elx = $("syncStatus");
+  if (text){ elx.textContent = text; return; }
+  if (!syncMeta.lastSync){ elx.textContent = "Not synced yet."; return; }
+  var d = new Date(syncMeta.lastSync);
+  elx.textContent = "Bookmarks, notes and settings synced " +
+    (Date.now() - syncMeta.lastSync < 60000 ? "just now." : "at " + d.toLocaleString() + ".");
+}
+
+/* ---- Account panel ---- */
+function showAccountMessage(text, isError){
+  var m = $("accountMsg");
+  m.textContent = text || "";
+  m.classList.toggle("error", !!isError);
+}
+var accountMode = "signin"; /* or "newpassword" */
+function renderAccount(){
+  var on = !!authConfig;
+  $("accountOff").hidden = on;
+  $("signInForm").hidden = !on || !!session || accountMode === "newpassword";
+  $("newPasswordForm").hidden = !on || !session || accountMode !== "newpassword";
+  $("signedInBox").hidden = !on || !session || accountMode === "newpassword";
+  $("accountIntro").hidden = !!session;
+  $("accountBtn").classList.toggle("signed-in", !!session);
+  $("accountBtn").setAttribute("aria-label", session ? "Account (signed in)" : "Account and sync");
+  if (session){
+    $("accountEmail").textContent = session.user.email || "your account";
+    if (!syncInFlight) setSyncStatus();
+  }
+  if (BIBLE){
+    var read = Object.keys(state.readChapters).length;
+    $("readingProgress").textContent = "Reading progress: you have opened " + read.toLocaleString() + " of " +
+      countChapters().toLocaleString() + " chapters" + (read ? ", and were last in " + state.book + " " + state.chapter + "." : ".");
+  }
+  $("deleteConfirm").hidden = true;
+}
+function openAccountPanel(){
+  renderAccount();
+  $("overlay4").classList.add("open");
+}
+function closeAccountPanel(){
+  $("overlay4").classList.remove("open");
+  if (accountMode !== "newpassword") showAccountMessage("");
+}
+function setBusy(ids, busy){
+  ids.forEach(function(id){ $(id).disabled = busy; });
+}
+function redirectUrl(){ return location.origin + location.pathname; }
+function readCredentials(){
+  var email = $("authEmail").value.trim(), password = $("authPassword").value;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showAccountMessage("Please type your email address.", true); return null; }
+  if (password.length < 6){ showAccountMessage("Please type a password of at least 6 characters.", true); return null; }
+  return {email: email, password: password};
+}
+function afterSignIn(welcome){
+  $("authPassword").value = "";
+  firstSyncPending = true;
+  syncMeta.lastSync = 0; saveSyncMeta();
+  renderAccount();
+  showAccountMessage(welcome);
+  syncNow(true).then(renderAccount);
+}
+function signIn(){
+  var c = readCredentials(); if (!c) return;
+  setBusy(["signInBtn", "signUpBtn"], true);
+  showAccountMessage("Signing in…");
+  sbRequest("/auth/v1/token?grant_type=password", {method: "POST", body: c})
+    .then(function(data){
+      if (!adoptSession(data)) throw new Error("The sign-in service gave an unexpected answer.");
+      afterSignIn("Welcome back. Your bookmarks, notes and settings are syncing.");
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["signInBtn", "signUpBtn"], false); });
+}
+function signUp(){
+  var c = readCredentials(); if (!c) return;
+  setBusy(["signInBtn", "signUpBtn"], true);
+  showAccountMessage("Creating your account…");
+  sbRequest("/auth/v1/signup?redirect_to=" + encodeURIComponent(redirectUrl()), {method: "POST", body: c})
+    .then(function(data){
+      if (adoptSession(data)){ afterSignIn("Your account is ready. What you have saved on this device is now kept in it."); return; }
+      showAccountMessage("Almost done: we sent a link to " + c.email + ". Open it to confirm your email, then come back here and tap Sign In." +
+        (isIOS() && isStandalone() ? " (On iPhone the link opens in Safari; after it confirms, return to this app to sign in.)" : ""));
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["signInBtn", "signUpBtn"], false); });
+}
+function forgotPassword(){
+  var email = $("authEmail").value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showAccountMessage("Type your email address above first, then tap Forgot your password.", true); return; }
+  showAccountMessage("Sending…");
+  sbRequest("/auth/v1/recover?redirect_to=" + encodeURIComponent(redirectUrl()), {method: "POST", body: {email: email}})
+    .then(function(){ showAccountMessage("If there is an account for " + email + ", we sent it a link to choose a new password."); })
+    .catch(function(err){ showAccountMessage(err.message, true); });
+}
+function saveNewPassword(){
+  var pw = $("newPassword").value;
+  if (pw.length < 6){ showAccountMessage("Please choose a password of at least 6 characters.", true); return; }
+  setBusy(["savePasswordBtn"], true);
+  sbRequest("/auth/v1/user", {method: "PUT", body: {password: pw}}, true)
+    .then(function(){
+      $("newPassword").value = "";
+      accountMode = "signin";
+      renderAccount();
+      showAccountMessage("Your new password is saved, and you're signed in.");
+      syncNow(true);
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["savePasswordBtn"], false); });
+}
+function signOut(){
+  var wipe = $("signOutWipe").checked;
+  var done = function(){
+    endSession();
+    if (wipe){
+      state.bookmarks = []; state.notes = {}; state.readChapters = {};
+      syncMeta = {settingsTs: 0, progressTs: 0, tombs: {}, lastSync: 0};
+      lastFingerprint = null;
+      saveState(); saveSyncMeta();
+      lastFingerprint = takeFingerprint();
+      openChapter(state.book, state.chapter);
+    }
+    $("signOutWipe").checked = false;
+    showAccountMessage(wipe ? "Signed out, and your saved items were removed from this device." : "Signed out. Your bookmarks and notes stay on this device.");
+  };
+  /* Push the latest changes first, then end the session on the server too. */
+  var pending = syncInFlight || Promise.resolve();
+  pending.then(function(){
+    return sbRequest("/auth/v1/logout", {method: "POST"}, true).catch(function(){});
+  }).then(done, done);
+}
+function deleteAccount(){
+  setBusy(["deleteYesBtn", "deleteNoBtn"], true);
+  sbRequest("/rest/v1/rpc/delete_my_account", {method: "POST", body: {}}, true)
+    .then(function(){
+      endSession();
+      syncMeta.lastSync = 0; saveSyncMeta();
+      showAccountMessage("Your account has been deleted. Your bookmarks and notes are still on this device.");
+    })
+    .catch(function(err){ showAccountMessage("Your account wasn't deleted: " + err.message, true); })
+    .then(function(){ setBusy(["deleteYesBtn", "deleteNoBtn"], false); });
+}
+
+/* Links in sign-up and password emails come back with the session in the
+   address (#access_token=…). Take it, then clean the address. */
+function readAuthRedirect(){
+  var h = location.hash;
+  if (!/access_token=|error_description=/.test(h)) return null;
+  var params = {};
+  h.replace(/^#/, "").split("&").forEach(function(pair){
+    var i = pair.indexOf("=");
+    if (i > 0) params[decodeURIComponent(pair.slice(0, i))] = decodeURIComponent(pair.slice(i + 1).replace(/\+/g, " "));
+  });
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  return params;
+}
+function handleAuthRedirect(params){
+  if (params.error_description){
+    openAccountPanel();
+    showAccountMessage(/expired|invalid/i.test(params.error_description)
+      ? "That email link has expired or was already used. Please ask for a new one." : params.error_description, true);
+    return;
+  }
+  if (!adoptSession(params)) return;
+  /* The address carries no email, so ask the service who this is. */
+  sbRequest("/auth/v1/user", {}, true).then(function(user){
+    if (user && session){ session.user = {id: user.id, email: user.email}; saveSession(); }
+    if (params.type === "recovery"){
+      accountMode = "newpassword";
+      openAccountPanel();
+      showAccountMessage("Choose a new password for " + (user && user.email || "your account") + ".");
+    } else {
+      openAccountPanel();
+      afterSignIn("Your email is confirmed and you're signed in.");
+    }
+  }).catch(function(err){
+    endSession();
+    openAccountPanel();
+    showAccountMessage(err.message, true);
+  });
+}
+
+function loadAuthConfig(){
+  return fetch("auth-config.json", {cache: "no-store"}).then(function(r){ return r.ok ? r.json() : null; })
+    .catch(function(){ return null; })
+    .then(function(cfg){
+      var url = cfg && typeof cfg.supabaseUrl === "string" ? cfg.supabaseUrl.trim().replace(/\/+$/, "") : "";
+      var key = cfg && typeof cfg.supabaseAnonKey === "string" ? cfg.supabaseAnonKey.trim() : "";
+      /* The page's security policy only lets it talk to *.supabase.co. */
+      if (/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) && key) authConfig = {url: url, key: key};
+      else if (url || key) console.warn("auth-config.json: supabaseUrl must look like https://<project>.supabase.co and supabaseAnonKey must be set.");
+    });
+}
+
+function initAccount(){
+  var savedMeta = loadJson(SYNC_KEY);
+  if (savedMeta && typeof savedMeta === "object"){
+    syncMeta.settingsTs = num(savedMeta.settingsTs);
+    syncMeta.progressTs = num(savedMeta.progressTs);
+    syncMeta.lastSync = num(savedMeta.lastSync);
+    if (savedMeta.tombs && typeof savedMeta.tombs === "object") syncMeta.tombs = savedMeta.tombs;
+  }
+  if (!state.notes || typeof state.notes !== "object" || Array.isArray(state.notes)) state.notes = {};
+  if (!state.readChapters || typeof state.readChapters !== "object" || Array.isArray(state.readChapters)) state.readChapters = {};
+  lastFingerprint = takeFingerprint();
+  var s = loadJson(AUTH_KEY);
+  if (s && s.access_token && s.refresh_token && s.user && s.user.id) session = s;
+
+  var redirect = readAuthRedirect();
+  loadAuthConfig().then(function(){
+    if (!authConfig) session = null;
+    renderAccount();
+    if (redirect && authConfig) handleAuthRedirect(redirect);
+    else if (session && BIBLE && firstSyncPending) syncNow(false);
+  });
+
+  $("accountBtn").addEventListener("click", openAccountPanel);
+  $("closeAccount").addEventListener("click", closeAccountPanel);
+  $("overlay4").addEventListener("click", function(e){ if (e.target.id === "overlay4") closeAccountPanel(); });
+  $("signInForm").addEventListener("submit", function(e){ e.preventDefault(); signIn(); });
+  $("signUpBtn").addEventListener("click", signUp);
+  $("forgotBtn").addEventListener("click", forgotPassword);
+  $("showPassword").addEventListener("change", function(e){ $("authPassword").type = e.target.checked ? "text" : "password"; });
+  $("newPasswordForm").addEventListener("submit", function(e){ e.preventDefault(); saveNewPassword(); });
+  $("syncNowBtn").addEventListener("click", function(){ showAccountMessage(""); syncNow(true).then(renderAccount); });
+  $("signOutBtn").addEventListener("click", signOut);
+  $("deleteAccountBtn").addEventListener("click", function(){ $("deleteConfirm").hidden = false; });
+  $("deleteNoBtn").addEventListener("click", function(){ $("deleteConfirm").hidden = true; });
+  $("deleteYesBtn").addEventListener("click", deleteAccount);
+
+  /* Catch up when the app comes back to the front or the connection returns. */
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible" && session && Date.now() - syncMeta.lastSync > 30000) scheduleSync(0);
+    if (document.visibilityState === "hidden" && session && syncTimer) syncNow(false);
+  });
+  window.addEventListener("online", function(){ if (session) scheduleSync(0); });
+}
+
+/* ============================================================
+   Install as an app (home screen)
+   ============================================================ */
+function isIOS(){
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function isStandalone(){
+  return navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+}
+var INSTALL_TIP_KEY = "kjv1611-install-tip";
+function initInstallTip(){
+  var installEvent = null;
+  function dismissed(){ try{ return localStorage.getItem(INSTALL_TIP_KEY) === "done"; }catch(e){ return false; } }
+  function hide(){
+    $("installTip").hidden = true;
+    try{ localStorage.setItem(INSTALL_TIP_KEY, "done"); }catch(e){}
+  }
+  $("installTipClose").addEventListener("click", hide);
+  if (isStandalone() || dismissed()) return;
+  if (isIOS()){
+    $("installTipText").textContent = "Put this Bible on your Home Screen: tap the Share button (the square with an arrow), then “Add to Home Screen”. It opens full screen and works offline.";
+    $("installTip").hidden = false;
+    return;
+  }
+  /* Android and desktop Chrome, Edge and Brave offer a real install prompt. */
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    installEvent = e;
+    $("installTipText").textContent = "Install this Bible as an app: it opens full screen and works offline.";
+    $("installTipBtn").hidden = false;
+    $("installTip").hidden = false;
+  });
+  $("installTipBtn").addEventListener("click", function(){
+    if (!installEvent) return;
+    installEvent.prompt();
+    installEvent.userChoice.then(function(){ installEvent = null; hide(); }, hide);
+  });
+  window.addEventListener("appinstalled", hide);
+}
+
+/* ============================================================
    Boot
    ============================================================ */
 function boot(){
   loadState();
   initSettingsUI();
+  initAccount();
+  initInstallTip();
   if ("speechSynthesis" in window){
     refreshVoices();
     speechSynthesis.onvoiceschanged = refreshVoices;
@@ -1694,6 +2491,7 @@ function boot(){
     var startBook = BIBLE[state.book] ? state.book : BOOK_ORDER[0];
     var startCh = (BIBLE[startBook] && BIBLE[startBook][state.chapter]) ? state.chapter : 1;
     openChapter(startBook, startCh);
+    if (session) syncNow(false);
   }).catch(function(err){
     $("pageBody").innerHTML =
       '<div class="loading-msg">The manuscript could not be loaded (' +

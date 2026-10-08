@@ -1,0 +1,5 @@
+{
+  "_help": "Optional sign-in. Paste your Supabase Project URL and its public anon (or publishable) key here; see SETUP-LOGIN.md. Never put the service_role or secret key in this file. Leave both empty to keep sign-in switched off.",
+  "supabaseUrl": "",
+  "supabaseAnonKey": ""
+}

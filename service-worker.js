@@ -10,7 +10,7 @@
 
 /* Bump CACHE_NAME whenever the app files or data/kjv.json change: data/ and
    icons/ are served cache-first, so a new cache name is how updates arrive. */
-var CACHE_NAME = "kjv1611-v4";
+var CACHE_NAME = "kjv1611-v6";
 var RUNTIME_CACHE = "kjv1611-runtime"; // fonts and illustrations seen while reading
 var SAVED_CACHE = "kjv1611-saved";     // what the user saved with the download buttons
 var RUNTIME_MAX_ENTRIES = 80;
@@ -18,6 +18,7 @@ var APP_SHELL = [
   "./",
   "./index.html",
   "./manifest.json",
+  "./auth-config.json",
   "./data/kjv.json",
   "./icons/icon-192.png",
   "./icons/icon-512.png",
@@ -168,7 +169,9 @@ self.addEventListener("fetch", function(event){
     return;
   }
 
-  if (isPageRequest(req)){
+  /* The sign-in settings file is fetched fresh like the page, so newly
+     added keys reach installed copies on their next launch. */
+  if (isPageRequest(req) || (url.origin === self.location.origin && /\/auth-config\.json$/.test(url.pathname))){
     event.respondWith(networkFirstWithTimeout(req, 3000));
     return;
   }
