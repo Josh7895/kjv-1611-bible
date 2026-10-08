@@ -7,7 +7,7 @@ loads from the online source, since browsers block local file reads).
 
 **Full experience (installable + offline):** put these files together on
 free static hosting (e.g. GitHub Pages) and open it from there:
-`index.html`, `manifest.json`, `service-worker.js`, `data/` and `icons/` folders.
+`index.html`, `manifest.json`, `service-worker.js`, `data/`, `icons/` and `art/` folders.
 Service workers only activate on `https://` (never on a local double-clicked
 file), so installing to your home screen and offline mode both need it
 hosted somewhere — GitHub Pages is free and takes about five minutes:
@@ -50,8 +50,14 @@ Needs `npm install --no-save playwright && npx playwright install chromium`.
 - **Text**: standard KJV (public domain), bundled as `data/kjv.json`
   (66 books, 31,102 verses, from midvash/bible-data). The live GitHub copy
   is only a fallback.
-- **Illustrations**: ~30 real 1866 Gustave Doré engravings, individually
-  verified on Wikimedia Commons (their policy bans watermarked PD scans).
+- **Illustrations**: every one of the 1,189 chapters has a picture. ~30
+  chapters show a real 1866 Gustave Doré engraving from Wikimedia Commons;
+  all the others show an original drawing bundled in `art/scenes/` (50
+  scenes, drawn by `tools/make_scenes.py`), which also stands in for a Doré
+  engraving when Wikimedia can't be reached. The drawings ship with the app,
+  so they work offline. Which picture and title each chapter gets is the
+  `PICTURES` list in `index.html`; `node tools/check_pictures.js` confirms
+  every chapter is covered.
 - **Narration**: real human narration — the complete public-domain
   LibriVox KJV recording (reader: Michael Armenta), chapter-mapped from
   the actual file listing, all 66 books. Falls back to your browser's

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7qjIcy6U4Np0xcmANaWjCwfM/RtRqABS2QdLnEnkSaM='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-nDCTXrs+MbZhVF0LpEcvw9QTzLfunSLEQ164r4cZC7c='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -875,6 +875,257 @@ var ART = {
   "Luke 15":     {f:"Gustave Dore - The prodigal son decides to return to his father.jpg", t:"The Prodigal Son Returns"}
 };
 
+/* A picture for every chapter. Each line is "chapter scene Title": the
+   scene (a drawing in art/scenes/) and title apply from that chapter until
+   the next line, so every chapter of every book is covered. Chapters with a
+   Doré engraving in ART show that instead, and fall back to the drawing if
+   it can't load (for example when offline). */
+var PICTURES = {
+  "Genesis": ["1 creation The Creation", "2 garden The Garden of Eden", "3 garden The Fall", "4 altar Cain and Abel",
+    "5 genealogy The Generations of Adam", "6 ark Noah Builds the Ark", "7 ark The Flood", "8 ark The Waters Recede",
+    "9 ark The Rainbow Covenant", "10 genealogy The Nations after the Flood", "11 tower The Tower of Babel",
+    "12 tents The Call of Abram", "13 shepherd Abram and Lot Part", "14 battle Abram Rescues Lot",
+    "15 tents The Stars of Heaven", "16 well Hagar in the Wilderness", "17 tents The Covenant of Abraham",
+    "18 tents Three Visitors", "19 exile Sodom Destroyed", "20 tents Abraham and Abimelech", "21 well Isaac Is Born",
+    "22 altar The Offering of Isaac", "23 tents The Burial of Sarah", "24 well Rebekah at the Well",
+    "25 tents Esau Sells His Birthright", "26 well Isaac's Wells", "27 tents Jacob Receives the Blessing",
+    "28 ladder Jacob's Ladder", "29 well Jacob Meets Rachel", "30 shepherd Jacob's Flocks", "31 shepherd Jacob Leaves Laban",
+    "32 tents Jacob Wrestles with the Angel", "33 shepherd Jacob and Esau Meet", "34 tents Dinah and Shechem",
+    "35 altar Jacob Returns to Bethel", "36 genealogy The Generations of Esau", "37 well Joseph Sold by His Brothers",
+    "38 tents Judah and Tamar", "39 egypt Joseph in Potiphar's House", "40 egypt Joseph in Prison", "41 king Pharaoh's Dreams",
+    "42 egypt Joseph's Brothers Go Down to Egypt", "43 egypt Benjamin Comes to Egypt", "44 egypt The Silver Cup",
+    "45 egypt Joseph Makes Himself Known", "46 egypt Jacob Goes into Egypt", "47 egypt Israel in Goshen",
+    "48 tents Jacob Blesses Joseph's Sons", "49 tents Jacob Blesses His Sons", "50 egypt The Death of Joseph"],
+  "Exodus": ["1 egypt Israel Oppressed in Egypt", "2 egypt Moses in the Bulrushes", "3 bush The Burning Bush",
+    "4 bush The Signs Given to Moses", "5 king Moses before Pharaoh", "7 egypt The Plagues of Egypt",
+    "12 egypt The Passover", "13 wilderness The Pillar of Cloud and Fire", "14 redsea Crossing the Red Sea",
+    "15 redsea The Song of Moses", "16 wilderness Manna from Heaven", "17 wilderness Water from the Rock",
+    "18 wilderness Jethro Visits Moses", "19 sinai Mount Sinai", "20 sinai The Ten Commandments",
+    "21 scroll Laws for Israel", "24 sinai The Covenant Sealed", "25 tabernacle Plans for the Tabernacle",
+    "32 altar The Golden Calf", "33 tabernacle The Tent of Meeting", "34 sinai New Tablets of Stone",
+    "35 tabernacle Building the Tabernacle", "40 tabernacle The Glory Fills the Tabernacle"],
+  "Leviticus": ["1 altar The Offerings", "8 tabernacle Aaron Made Priest", "10 altar Nadab and Abihu",
+    "11 scroll Clean and Unclean", "16 tabernacle The Day of Atonement", "17 scroll The Law of Holiness",
+    "23 harvest The Feasts of the Lord", "25 harvest The Year of Jubilee", "26 scroll Blessings and Warnings"],
+  "Numbers": ["1 wilderness The Numbering of Israel", "6 tabernacle The Priestly Blessing", "9 wilderness The Cloud over the Tabernacle",
+    "11 wilderness Quails in the Camp", "13 vineyard The Twelve Spies", "14 wilderness Forty Years in the Wilderness",
+    "16 wilderness The Rebellion of Korah", "17 tabernacle Aaron's Rod Blossoms", "20 wilderness Water from the Rock",
+    "21 wilderness The Serpent of Brass", "22 prophet Balaam and the Angel", "25 wilderness Israel at Peor",
+    "26 genealogy The Second Numbering", "27 prophet Joshua Chosen", "28 altar Offerings and Feasts",
+    "31 battle War with Midian", "32 shepherd The Tribes beyond Jordan", "33 wilderness The Journeys of Israel",
+    "34 wilderness The Borders of the Land"],
+  "Deuteronomy": ["1 prophet Moses Speaks to Israel", "5 sinai The Ten Commandments Repeated", "6 scroll Hear, O Israel",
+    "7 scroll A Holy People", "12 scroll Laws for the Land", "27 sinai Blessings and Curses", "29 scroll The Covenant Renewed",
+    "31 prophet Joshua Charged", "32 prophet The Song of Moses", "33 prophet Moses Blesses the Tribes",
+    "34 prophet The Death of Moses"],
+  "Joshua": ["1 prophet Be Strong and of a Good Courage", "2 jericho Rahab and the Spies", "3 redsea Crossing the Jordan",
+    "4 altar Twelve Stones", "5 battle The Captain of the Lord's Host", "6 jericho The Walls of Jericho Fall",
+    "7 battle Achan's Sin", "8 battle The Taking of Ai", "9 battle The Gibeonites", "10 battle The Sun Stands Still",
+    "11 battle The Conquest of the North", "12 genealogy The Kings Defeated", "13 shepherd Dividing the Land",
+    "20 jericho Cities of Refuge", "22 altar The Altar by Jordan", "23 prophet Joshua's Farewell",
+    "24 prophet Choose You This Day"],
+  "Judges": ["1 battle Israel among the Nations", "3 battle Ehud and Shamgar", "4 battle Deborah and Barak",
+    "5 harp The Song of Deborah", "6 altar Gideon Called", "7 battle Gideon's Three Hundred", "8 battle Gideon Pursues Midian",
+    "9 king Abimelech", "10 battle Israel Oppressed", "11 battle Jephthah", "13 altar Samson's Birth Foretold",
+    "14 harvest Samson and the Lion", "15 battle Samson and the Philistines", "16 temple Samson and Delilah",
+    "17 tents Micah's Idols", "19 battle Civil War in Israel"],
+  "Ruth": ["1 tents Ruth Stays with Naomi", "2 harvest Ruth Gleans in Boaz's Field", "3 harvest Ruth at the Threshing Floor",
+    "4 genealogy Boaz Marries Ruth"],
+  "1 Samuel": ["1 temple Hannah's Prayer", "2 harp Hannah's Song", "3 temple The Lord Calls Samuel", "4 battle The Ark Is Taken",
+    "5 temple The Ark among the Philistines", "6 harvest The Ark Returns", "7 altar Samuel Judges Israel",
+    "8 king Israel Asks for a King", "9 prophet Saul Meets Samuel", "10 king Saul Anointed King", "11 battle Saul Saves Jabesh",
+    "12 prophet Samuel's Farewell", "13 battle War with the Philistines", "14 battle Jonathan's Victory",
+    "15 prophet Saul Rejected", "16 shepherd David Anointed", "17 battle David and Goliath", "18 king David and Jonathan",
+    "19 king Saul Seeks David", "20 shepherd Jonathan's Arrows", "21 temple David Flees", "22 battle The Cave of Adullam",
+    "24 battle David Spares Saul", "25 shepherd David and Abigail", "26 battle David Spares Saul Again",
+    "27 battle David among the Philistines", "28 prophet Saul and the Witch of Endor", "29 battle David Sent Away",
+    "30 battle David Recovers All", "31 battle The Death of Saul"],
+  "2 Samuel": ["1 harp David Mourns Saul and Jonathan", "2 king David King of Judah", "3 battle Abner and Joab",
+    "5 king David King of All Israel", "6 tabernacle The Ark Brought to Jerusalem", "7 king God's Promise to David",
+    "8 battle David's Victories", "9 king Kindness to Mephibosheth", "10 battle War with Ammon", "11 king David and Bathsheba",
+    "12 prophet Nathan Rebukes David", "13 king Amnon and Absalom", "15 king Absalom's Rebellion", "16 battle David Flees",
+    "18 battle The Death of Absalom", "19 king David Returns", "20 battle Sheba's Revolt", "21 battle The Giants Fall",
+    "22 harp David's Song of Deliverance", "23 harp The Last Words of David", "24 altar David's Altar"],
+  "1 Kings": ["1 king Solomon Anointed King", "2 king David's Charge to Solomon", "3 king The Wisdom of Solomon",
+    "4 king Solomon's Kingdom", "5 temple Preparing to Build the Temple", "6 temple Solomon Builds the Temple",
+    "7 king Solomon's House", "8 temple The Temple Dedicated", "9 temple God Appears to Solomon",
+    "10 queen The Queen of Sheba", "11 king Solomon Turns Away", "12 king The Kingdom Divided", "13 prophet The Man of God from Judah",
+    "14 prophet Ahijah's Prophecy", "15 king Kings of Judah and Israel", "17 prophet Elijah Fed by Ravens",
+    "18 altar Elijah on Mount Carmel", "19 prophet The Still Small Voice", "20 battle Ahab and Ben-hadad",
+    "21 vineyard Naboth's Vineyard", "22 battle The Death of Ahab"],
+  "2 Kings": ["1 prophet Elijah and Ahaziah", "2 chariot Elijah Taken up to Heaven", "3 battle Water in the Valley",
+    "4 prophet Elisha's Miracles", "5 healing Naaman Healed", "6 battle The Chariots of Fire", "7 battle The Siege of Samaria",
+    "8 prophet Elisha and Hazael", "9 king Jehu Anointed", "11 temple Joash Made King", "12 temple Repairing the Temple",
+    "13 prophet The Death of Elisha", "14 king Kings of Judah and Israel", "17 exile Israel Taken Captive",
+    "18 king Hezekiah", "19 temple Hezekiah's Prayer", "20 prophet Hezekiah's Life Lengthened", "21 king Manasseh",
+    "22 scroll The Book of the Law Found", "23 temple Josiah's Reforms", "24 exile Jerusalem Besieged",
+    "25 exile Jerusalem Falls"],
+  "1 Chronicles": ["1 genealogy The Generations from Adam", "10 battle The Death of Saul", "11 king David King over Israel",
+    "13 tabernacle The Ark Moved", "15 tabernacle The Ark Comes to Jerusalem", "16 harp David's Psalm of Thanks",
+    "17 king God's Promise to David", "18 battle David's Victories", "21 altar David's Altar", "22 temple Preparing for the Temple",
+    "23 temple The Levites and Priests", "27 genealogy David's Officers", "28 king David's Charge to Solomon",
+    "29 king The Gifts for the Temple"],
+  "2 Chronicles": ["1 king Solomon Asks for Wisdom", "2 temple Building the Temple", "5 temple The Glory Fills the Temple",
+    "6 temple Solomon's Prayer", "8 king Solomon's Works", "9 queen The Queen of Sheba", "10 king The Kingdom Divided",
+    "13 battle Abijah's Victory", "14 battle Asa Trusts the Lord", "17 king Jehoshaphat", "20 harp Jehoshaphat's Singers",
+    "21 king Kings of Judah", "23 temple Joash Crowned", "24 temple Joash Repairs the Temple", "25 king Kings of Judah",
+    "29 temple Hezekiah Cleanses the Temple", "30 tabernacle Hezekiah's Passover", "32 battle Sennacherib Invades",
+    "33 king Manasseh Repents", "34 scroll The Book of the Law Found", "35 tabernacle Josiah's Passover",
+    "36 exile The Fall of Jerusalem"],
+  "Ezra": ["1 rebuild The Return from Exile", "2 genealogy Those Who Returned", "3 temple The Foundation Laid",
+    "4 rebuild The Work Opposed", "6 temple The Temple Finished", "7 scroll Ezra Comes to Jerusalem", "9 prophet Ezra's Prayer"],
+  "Nehemiah": ["1 king Nehemiah's Prayer", "2 rebuild Nehemiah Inspects the Walls", "3 rebuild Rebuilding the Walls",
+    "4 rebuild Building with Sword and Trowel", "5 rebuild Nehemiah Helps the Poor", "6 rebuild The Wall Finished",
+    "7 genealogy The Register of the Returned", "8 scroll Ezra Reads the Law", "9 prophet The People Confess",
+    "11 genealogy Living in Jerusalem", "12 harp The Wall Dedicated", "13 temple Nehemiah's Reforms"],
+  "Esther": ["1 king The Feast of Ahasuerus", "2 queen Esther Made Queen", "3 king Haman's Plot", "4 queen For Such a Time as This",
+    "5 queen Esther Goes before the King", "6 king Mordecai Honored", "7 queen Haman's Downfall", "8 king The King's Decree",
+    "9 harp The Feast of Purim"],
+  "Job": ["1 whirlwind Job Tested", "2 whirlwind Job's Patience", "3 whirlwind Job's Lament", "4 whirlwind Job's Friends Speak",
+    "38 whirlwind The Lord Answers out of the Whirlwind", "42 shepherd Job Restored"],
+  "Psalms": ["1 tree The Blessed Man", "2 king The Lord's Anointed", "3 harp A Psalm of David", "8 creation How Excellent Is Thy Name",
+    "9 harp A Psalm of Praise", "19 creation The Heavens Declare the Glory of God", "20 harp A Psalm of David",
+    "22 cross My God, My God", "23 shepherd The Lord Is My Shepherd", "24 temple The King of Glory", "25 harp A Psalm of David",
+    "42 well As the Hart Panteth", "43 harp A Psalm", "46 rebuild God Is Our Refuge", "47 harp A Psalm of Praise",
+    "51 prophet Create in Me a Clean Heart", "52 harp A Psalm", "84 temple How Amiable Are Thy Tabernacles",
+    "85 harp A Psalm", "90 prophet A Prayer of Moses", "91 harp Under the Shadow of the Almighty", "92 harp A Psalm",
+    "100 harp Make a Joyful Noise", "101 harp A Psalm", "103 harp Bless the Lord, O My Soul", "104 creation The Works of Creation",
+    "105 harp Remembering God's Wonders", "107 storm They That Go Down to the Sea", "108 harp A Psalm",
+    "119 scroll Thy Word Is a Lamp", "120 temple A Song of Degrees", "121 shepherd I Will Lift up Mine Eyes",
+    "122 temple A Song of Degrees", "137 exile By the Rivers of Babylon", "138 harp A Psalm of David",
+    "139 creation Fearfully and Wonderfully Made", "140 harp A Psalm of David", "148 creation Praise Him, Sun and Moon",
+    "149 harp Praise Ye the Lord", "150 harp Let Every Thing That Hath Breath Praise the Lord"],
+  "Proverbs": ["1 lamp The Beginning of Knowledge", "3 lamp Trust in the Lord", "8 lamp Wisdom Calls", "10 lamp The Proverbs of Solomon",
+    "31 harvest The Virtuous Woman"],
+  "Ecclesiastes": ["1 lamp Vanity of Vanities", "3 harvest A Time for Every Purpose", "4 lamp The Preacher's Words",
+    "12 lamp Remember Thy Creator"],
+  "Song of Solomon": ["1 vineyard The Song of Songs"],
+  "Isaiah": ["1 prophet The Vision of Isaiah", "2 temple The Mountain of the Lord", "3 prophet Judgment on Judah",
+    "6 temple Isaiah's Vision of the Lord", "7 nativity A Virgin Shall Conceive", "8 prophet The Prophet's Signs",
+    "9 nativity Unto Us a Child Is Born", "10 prophet Judgment and Hope", "11 shepherd The Peaceable Kingdom",
+    "12 harp A Song of Praise", "13 exile Burdens upon the Nations", "24 prophet The Earth Made Empty", "25 harp A Song of Victory",
+    "26 harp A Song in Judah", "27 vineyard The Vineyard of the Lord", "28 prophet Woe to Ephraim", "35 wilderness The Desert Shall Blossom",
+    "36 battle Sennacherib Threatens Jerusalem", "37 temple Hezekiah's Prayer", "38 prophet Hezekiah's Sickness",
+    "39 king Envoys from Babylon", "40 shepherd Comfort Ye My People", "41 prophet Fear Thou Not", "44 prophet Idols Are Vain",
+    "45 prophet Cyrus the Lord's Anointed", "46 prophet Bel Boweth Down", "52 rebuild How Beautiful upon the Mountains",
+    "53 cross The Suffering Servant", "54 tents Enlarge the Place of Thy Tent", "55 well Ho, Every One That Thirsteth",
+    "56 temple A House of Prayer", "58 prophet The True Fast", "60 newjerusalem Arise, Shine", "61 prophet Good Tidings to the Meek",
+    "62 newjerusalem Zion's Salvation", "63 prophet The Lord's Day of Vengeance", "65 newjerusalem New Heavens and a New Earth"],
+  "Jeremiah": ["1 prophet The Call of Jeremiah", "2 prophet Israel Forsakes the Lord", "7 temple The Temple Sermon",
+    "8 prophet The Weeping Prophet", "13 prophet The Linen Girdle", "18 prophet The Potter's House", "19 prophet The Broken Bottle",
+    "20 prophet Jeremiah in the Stocks", "21 battle Jerusalem's Doom", "23 shepherd The Righteous Branch", "24 vineyard Two Baskets of Figs",
+    "25 exile Seventy Years of Captivity", "26 temple Jeremiah on Trial", "27 prophet The Yoke of Babylon", "29 letter Letter to the Exiles",
+    "30 rebuild Restoration Promised", "31 rebuild The New Covenant", "32 prophet Jeremiah Buys a Field", "33 rebuild Health and Cure",
+    "34 prophet Warnings to Zedekiah", "36 scroll The King Burns the Scroll", "37 prophet Jeremiah Imprisoned",
+    "38 prophet Jeremiah in the Dungeon", "39 exile Jerusalem Taken", "40 exile The Remnant in Judah", "43 egypt The Flight into Egypt",
+    "46 battle Prophecies against the Nations", "50 exile The Fall of Babylon", "52 exile The Fall of Jerusalem"],
+  "Lamentations": ["1 exile How Doth the City Sit Solitary", "3 prophet His Mercies Are New Every Morning", "4 exile Zion's Sorrow",
+    "5 prophet A Prayer for Mercy"],
+  "Ezekiel": ["1 throne Ezekiel's Vision of God", "2 scroll Ezekiel Eats the Scroll", "4 prophet The Siege Acted Out",
+    "8 temple Visions in the Temple", "10 throne The Glory Departs", "11 prophet A New Spirit", "12 exile Signs of Exile",
+    "13 prophet False Prophets", "16 prophet Jerusalem's Unfaithfulness", "18 prophet The Soul That Sinneth",
+    "25 prophet Prophecies against the Nations", "27 voyage The Ships of Tyre", "29 egypt Against Egypt", "33 prophet The Watchman",
+    "34 shepherd The Good Shepherd", "36 rebuild A New Heart", "37 valley The Valley of Dry Bones", "38 battle Gog and Magog",
+    "40 temple The Vision of the New Temple", "47 temple The River from the Temple", "48 newjerusalem The Lord Is There"],
+  "Daniel": ["1 king Daniel in Babylon", "2 king Nebuchadnezzar's Dream", "3 furnace The Fiery Furnace",
+    "4 king The King Humbled", "5 king The Writing on the Wall", "6 lions Daniel in the Lions' Den",
+    "7 throne The Ancient of Days", "8 prophet The Ram and the Goat", "9 prophet Daniel's Prayer", "10 prophet The Vision by the River",
+    "12 seals The Time of the End"],
+  "Hosea": ["1 prophet Hosea's Marriage", "3 prophet Love Restored", "4 prophet The Lord's Controversy", "11 shepherd When Israel Was a Child",
+    "14 vineyard Return unto the Lord"],
+  "Joel": ["1 harvest The Locusts", "2 pentecost I Will Pour out My Spirit", "3 harvest The Valley of Decision"],
+  "Amos": ["1 shepherd The Herdsman of Tekoa", "3 prophet Judgment on Israel", "7 prophet The Plumbline", "8 harvest A Basket of Summer Fruit",
+    "9 rebuild The Tabernacle of David Raised"],
+  "Obadiah": ["1 prophet The Vision of Obadiah"],
+  "Jonah": ["1 storm Jonah Flees from the Lord", "2 fish Jonah and the Great Fish", "3 prophet Jonah Preaches to Nineveh",
+    "4 tree Jonah and the Gourd"],
+  "Micah": ["1 prophet Micah's Warning", "4 temple The Mountain of the Lord", "5 nativity Out of Bethlehem", "6 prophet What Doth the Lord Require",
+    "7 prophet Mercy and Pardon"],
+  "Nahum": ["1 prophet The Burden of Nineveh", "2 battle The Fall of Nineveh"],
+  "Habakkuk": ["1 prophet The Prophet's Question", "2 scroll Write the Vision", "3 harp Habakkuk's Prayer"],
+  "Zephaniah": ["1 prophet The Day of the Lord", "3 harp Sing, O Daughter of Zion"],
+  "Haggai": ["1 rebuild Build the House", "2 temple The Glory of the Latter House"],
+  "Zechariah": ["1 prophet Visions of the Night", "3 temple Joshua the High Priest", "4 lamp The Golden Candlestick",
+    "5 scroll The Flying Roll", "6 chariot The Four Chariots", "7 prophet Justice and Mercy", "8 rebuild Jerusalem Restored",
+    "9 king Thy King Cometh", "11 shepherd The Shepherds", "12 prophet Jerusalem Delivered", "14 newjerusalem The Lord Shall Be King"],
+  "Malachi": ["1 altar The Polluted Offerings", "2 prophet The Covenant of Levi", "3 temple The Messenger of the Covenant",
+    "4 creation The Sun of Righteousness"],
+  "Matthew": ["1 genealogy The Genealogy of Jesus", "2 nativity The Wise Men", "3 redsea John the Baptist", "4 wilderness The Temptation",
+    "5 mount The Sermon on the Mount", "8 healing Jesus Heals", "9 healing The Ruler's Daughter", "10 mount The Twelve Sent Out",
+    "11 mount Come unto Me", "12 harvest Lord of the Sabbath", "13 harvest The Parable of the Sower", "14 storm Jesus Walks on the Water",
+    "15 healing The Woman of Canaan", "16 mount Thou Art the Christ", "17 cloud The Transfiguration", "18 shepherd The Lost Sheep",
+    "19 healing Little Children", "20 vineyard The Labourers in the Vineyard", "21 temple The Triumphal Entry",
+    "22 supper The Wedding Feast", "23 temple Woes to the Pharisees", "24 mount The Mount of Olives", "25 lamp The Ten Virgins",
+    "26 supper The Last Supper", "27 cross The Crucifixion", "28 tomb He Is Risen"],
+  "Mark": ["1 redsea The Baptism of Jesus", "2 healing The Paralytic Healed", "3 mount The Twelve Chosen", "4 storm Jesus Stills the Storm",
+    "5 healing Jairus's Daughter", "6 harvest Feeding the Five Thousand", "7 healing Ephphatha", "8 harvest Feeding the Four Thousand",
+    "9 cloud The Transfiguration", "10 healing Blind Bartimaeus", "11 temple The Triumphal Entry", "12 vineyard The Wicked Husbandmen",
+    "13 mount Signs of the End", "14 supper The Last Supper", "15 cross The Crucifixion", "16 tomb He Is Risen"],
+  "Luke": ["1 temple The Angel Visits Zacharias", "2 nativity The Birth of Jesus", "3 redsea John the Baptist", "4 wilderness The Temptation",
+    "5 storm The Great Catch of Fish", "6 mount The Sermon on the Plain", "7 healing The Widow's Son Raised", "8 storm Jesus Calms the Storm",
+    "9 harvest Feeding the Five Thousand", "10 healing The Good Samaritan", "11 mount The Lord's Prayer", "12 harvest The Rich Fool",
+    "13 healing The Woman Made Straight", "14 supper The Great Supper", "15 shepherd The Lost Sheep and the Prodigal Son",
+    "16 king The Rich Man and Lazarus", "17 healing Ten Lepers Cleansed", "18 temple The Pharisee and the Publican",
+    "19 tree Zacchaeus", "20 vineyard The Wicked Husbandmen", "21 temple The Widow's Mites", "22 supper The Last Supper",
+    "23 cross The Crucifixion", "24 tomb The Road to Emmaus"],
+  "John": ["1 creation In the Beginning Was the Word", "2 supper The Wedding at Cana", "3 lamp Nicodemus", "4 well The Woman at the Well",
+    "5 healing The Pool of Bethesda", "6 harvest The Bread of Life", "7 temple The Feast of Tabernacles", "8 temple The Light of the World",
+    "9 healing The Man Born Blind", "10 shepherd The Good Shepherd", "11 tomb Lazarus Raised", "12 temple The Triumphal Entry",
+    "13 supper Jesus Washes the Disciples' Feet", "14 supper Let Not Your Heart Be Troubled", "15 vineyard The True Vine",
+    "16 supper The Comforter Promised", "17 mount Jesus Prays", "18 battle Jesus Betrayed", "19 cross The Crucifixion",
+    "20 tomb The Empty Tomb", "21 storm Breakfast by the Sea"],
+  "Acts": ["1 cloud The Ascension", "2 pentecost The Day of Pentecost", "3 healing The Lame Man Healed", "4 temple Peter and John Arrested",
+    "5 temple The Apostles in Prison", "6 mount Seven Deacons Chosen", "7 cross Stephen's Martyrdom", "8 healing Philip in Samaria",
+    "9 prophet Saul's Conversion", "10 prophet Peter and Cornelius", "11 healing The Church at Antioch", "12 temple Peter Delivered from Prison",
+    "13 voyage Paul's First Journey", "15 letter The Council at Jerusalem", "16 voyage Paul and Silas", "17 temple Paul at Athens",
+    "18 voyage Paul at Corinth", "19 healing Paul at Ephesus", "20 voyage Paul's Farewell", "21 temple Paul Arrested",
+    "22 prophet Paul's Defence", "23 king Paul before the Council", "24 king Paul before Felix", "25 king Paul before Festus",
+    "26 king Paul before Agrippa", "27 storm The Shipwreck", "28 voyage Paul at Rome"],
+  "Romans": ["1 letter The Epistle to the Romans", "8 cloud No Condemnation", "12 letter A Living Sacrifice", "16 letter Greetings to the Saints"],
+  "1 Corinthians": ["1 letter The First Epistle to the Corinthians", "11 supper The Lord's Supper", "12 pentecost Spiritual Gifts",
+    "13 lamp The Greatest of These Is Charity", "15 tomb The Resurrection", "16 letter Paul's Farewell"],
+  "2 Corinthians": ["1 letter The Second Epistle to the Corinthians", "4 lamp Treasure in Earthen Vessels", "5 letter New Creatures",
+    "11 storm Paul's Sufferings", "12 letter My Grace Is Sufficient"],
+  "Galatians": ["1 letter The Epistle to the Galatians", "5 vineyard The Fruit of the Spirit", "6 letter Bear Ye One Another's Burdens"],
+  "Ephesians": ["1 letter The Epistle to the Ephesians", "6 battle The Whole Armour of God"],
+  "Philippians": ["1 letter The Epistle to the Philippians", "2 cross The Mind of Christ", "3 letter Pressing toward the Mark",
+    "4 letter Rejoice in the Lord Alway"],
+  "Colossians": ["1 letter The Epistle to the Colossians"],
+  "1 Thessalonians": ["1 letter The First Epistle to the Thessalonians", "4 cloud The Coming of the Lord", "5 letter Children of Light"],
+  "2 Thessalonians": ["1 letter The Second Epistle to the Thessalonians"],
+  "1 Timothy": ["1 letter The First Epistle to Timothy"],
+  "2 Timothy": ["1 letter The Second Epistle to Timothy", "4 letter I Have Fought a Good Fight"],
+  "Titus": ["1 letter The Epistle to Titus"],
+  "Philemon": ["1 letter The Epistle to Philemon"],
+  "Hebrews": ["1 letter The Epistle to the Hebrews", "9 tabernacle The Better Tabernacle", "10 letter Hold Fast", "11 altar The Heroes of Faith",
+    "12 mount The Great Cloud of Witnesses", "13 letter Let Brotherly Love Continue"],
+  "James": ["1 letter The Epistle of James", "3 lamp Taming the Tongue", "5 harvest Be Patient"],
+  "1 Peter": ["1 letter The First Epistle of Peter", "5 shepherd Feed the Flock"],
+  "2 Peter": ["1 letter The Second Epistle of Peter", "3 cloud The Day of the Lord"],
+  "1 John": ["1 lamp God Is Light", "4 letter God Is Love"],
+  "2 John": ["1 letter The Second Epistle of John"],
+  "3 John": ["1 letter The Third Epistle of John"],
+  "Jude": ["1 letter The Epistle of Jude"],
+  "Revelation": ["1 lamp The Seven Golden Candlesticks", "2 letter Letters to the Seven Churches", "4 throne The Throne in Heaven",
+    "5 seals The Book with Seven Seals", "7 throne The Great Multitude", "8 seals The Seven Trumpets", "10 scroll The Little Book",
+    "11 temple The Two Witnesses", "12 prophet The Woman and the Dragon", "13 prophet The Beast", "14 harvest The Harvest of the Earth",
+    "15 harp The Song of Moses and the Lamb", "16 seals The Seven Vials", "17 exile Babylon the Great", "18 exile Babylon Is Fallen",
+    "19 battle The Rider on the White Horse", "20 throne The Great White Throne", "21 newjerusalem The New Jerusalem",
+    "22 newjerusalem The River of Life"]
+};
+
+/* The drawn picture for a chapter: the last PICTURES line at or before it. */
+function scenePicture(book, chapter){
+  var lines = PICTURES[book], best = null;
+  if (!lines) return null;
+  for (var i=0; i<lines.length; i++){
+    var m = /^(\d+) (\S+) (.+)$/.exec(lines[i]);
+    if (m && Number(m[1]) <= chapter) best = {scene:m[2], t:m[3]};
+  }
+  return best;
+}
+function sceneUrl(scene){ return "art/scenes/" + scene + ".svg"; }
+
 /* Archaic 1611-style titles, included only where we're confident of the
    original wording — left plain (still blackletter-styled) elsewhere
    rather than guess at the rest. */
@@ -1207,18 +1458,35 @@ function openChapter(book, chapter){
   body.appendChild(el("span","rule-flourish"));
 
   var art = ART[book + " " + chapter];
+  var drawn = scenePicture(book, state.chapter);
   var artPanel = el("div"); artPanel.id="artPanel";
-  if (art && state.showArt){
+  if ((art || drawn) && state.showArt){
     var fig = el("figure");
     var img = document.createElement("img");
-    var artWidth = window.innerWidth<=820 ? 480 : 700;
-    img.src = commonsUrl(art.f, artWidth); img.alt = art.t; img.loading="lazy";
-    img.onerror = function(){
-      artPanel.innerHTML = "";
-      artPanel.appendChild(el("div","art-error","(Illustration failed to load \u2014 check your connection.)"));
+    var cap = el("figcaption");
+    var showDrawn = function(){
+      img.onerror = function(){ artPanel.innerHTML = ""; };
+      img.src = sceneUrl(drawn.scene); img.alt = drawn.t;
+      cap.textContent = drawn.t;
     };
+    img.loading="lazy";
+    if (art){
+      var artWidth = window.innerWidth<=820 ? 480 : 700;
+      img.src = commonsUrl(art.f, artWidth); img.alt = art.t;
+      cap.textContent = art.t + " \u2014 engraven by G. Dor\u00e9, 1866";
+      /* No connection to Wikimedia (offline, or blocked): show the drawing. */
+      img.onerror = function(){
+        if (drawn) showDrawn();
+        else {
+          artPanel.innerHTML = "";
+          artPanel.appendChild(el("div","art-error","(Illustration failed to load \u2014 check your connection.)"));
+        }
+      };
+    } else {
+      showDrawn();
+    }
     fig.appendChild(img);
-    fig.appendChild(el("figcaption","", art.t + " \u2014 engraven by G. Dor\u00e9, 1866"));
+    fig.appendChild(cap);
     artPanel.appendChild(fig);
     body.appendChild(artPanel);
   }
@@ -1479,7 +1747,7 @@ function cacheUrls(urls, done){
 var downloadForOfflineHandler = null;
 function downloadForOffline(){
   if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
-  var urls = []; // the KJV text itself is already stored when the app installs
+  var urls = []; // the KJV text and the drawn pictures are already stored when the app installs
   Object.keys(ART).forEach(function(key){
     urls.push(commonsUrl(ART[key].f, 700));
     urls.push(commonsUrl(ART[key].f, 480));

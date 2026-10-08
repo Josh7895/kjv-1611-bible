@@ -8,12 +8,23 @@
    still works, it just won't be installable or offline-capable until
    it's hosted somewhere real. */
 
-/* Bump CACHE_NAME whenever the app files or data/kjv.json change: data/ and
-   icons/ are served cache-first, so a new cache name is how updates arrive. */
-var CACHE_NAME = "kjv1611-v6";
+/* Bump CACHE_NAME whenever the app files or data/kjv.json change: data/,
+   icons/ and art/ are served cache-first, so a new cache name is how updates arrive. */
+var CACHE_NAME = "kjv1611-v7";
 var RUNTIME_CACHE = "kjv1611-runtime"; // fonts and illustrations seen while reading
 var SAVED_CACHE = "kjv1611-saved";     // what the user saved with the download buttons
 var RUNTIME_MAX_ENTRIES = 80;
+/* The drawn story pictures (art/scenes/), stored at install so every chapter
+   has its picture offline. tools/check_pictures.js keeps this list in sync. */
+var SCENES = [
+  "altar", "ark", "battle", "bush", "chariot", "cloud", "creation", "cross",
+  "egypt", "exile", "fish", "furnace", "garden", "genealogy", "harp",
+  "harvest", "healing", "jericho", "king", "ladder", "lamp", "letter",
+  "lions", "mount", "nativity", "newjerusalem", "pentecost", "prophet",
+  "queen", "rebuild", "redsea", "scroll", "seals", "shepherd", "sinai",
+  "storm", "supper", "tabernacle", "temple", "tents", "throne", "tomb", "tower",
+  "tree", "valley", "vineyard", "voyage", "well", "whirlwind", "wilderness"
+];
 var APP_SHELL = [
   "./",
   "./index.html",
@@ -23,7 +34,7 @@ var APP_SHELL = [
   "./icons/icon-192.png",
   "./icons/icon-512.png",
   "./icons/apple-touch-icon.png"
-];
+].concat(SCENES.map(function(s){ return "./art/scenes/" + s + ".svg"; }));
 
 /* The only other origins the app loads from and may cache at runtime. */
 var RUNTIME_ORIGINS = [
@@ -139,10 +150,10 @@ function networkFirstWithTimeout(req, timeoutMs){
   });
 }
 
-/* data/ (the KJV text) and icons/ only change with a new CACHE_NAME, so
-   serve them straight from this version's cache. */
+/* data/ (the KJV text), icons/ and art/ only change with a new CACHE_NAME,
+   so serve them straight from this version's cache. */
 function isVersionedAsset(url){
-  return url.origin === self.location.origin && /\/(data|icons)\//.test(url.pathname);
+  return url.origin === self.location.origin && /\/(data|icons|art)\//.test(url.pathname);
 }
 function cacheFirst(req){
   return caches.open(CACHE_NAME).then(function(cache){
