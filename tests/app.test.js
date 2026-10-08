@@ -194,9 +194,9 @@ const android = devices["Pixel 5"];
       await page.waitForSelector(".note-saved:text('Saved.')");
       await page.locator(".chapter-note").scrollIntoViewIfNeeded();
       await shot(page, "2b-iphone-chapter-note");
-      await page.click("#settingsBtn");
+      await page.click("#settingsBtn"); await page.click("#qsMore"); /* Settings opens the quick strip; the full list is under More settings */
       await page.click("#themeStoneBtn");
-      await page.click("#closeSettings");
+      await page.click("#closeSettings"); await page.click("#qsDone");
       await page.waitForFunction(() => true);
       await page.waitForTimeout(3500);
       const row = Object.values(db.rows)[0];
