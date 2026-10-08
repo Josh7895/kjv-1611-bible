@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EUw67cIKwSmmjFTZDkc1CVd1cfuwAkeZ/CglJeO1oHY='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-/of56F8yl1F3pQ0ThC2DF1xBhUGZaeng01yGHrnBaJE='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -374,8 +374,58 @@ ul.book-list li{ margin:0; }
   font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:13px; cursor:pointer;
 }
 
+/* ---- Quick settings: sits in the page flow above the text, never on top of it ---- */
+#quickSettings{
+  width:100%; max-width:900px; margin:0 0 18px;
+  background:var(--panel-bg); border:1px solid var(--rule); border-radius:10px;
+  padding:16px; color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+}
+#quickSettings[hidden]{ display:none; }
+.qs-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.qs-item{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  min-height:64px; padding:10px 14px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--parchment); font-size:19px; line-height:1.25;
+}
+.qs-item .qs-label{ display:flex; align-items:center; gap:10px; }
+.qs-item .qs-icon{ font-size:24px; width:28px; text-align:center; }
+.qs-switch{
+  flex:0 0 auto; position:relative; width:72px; height:40px; padding:0;
+  border:2px solid var(--rule); border-radius:22px; background:var(--rule); cursor:pointer;
+  transition:background .2s;
+}
+.qs-switch::before{
+  content:""; position:absolute; top:3px; left:3px; width:30px; height:30px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.4); transition:transform .2s;
+}
+.qs-switch[aria-checked="true"]{ background:var(--rubric); border-color:var(--rubric); }
+.qs-switch[aria-checked="true"]::before{ transform:translateX(32px); }
+.qs-switch .qs-state{
+  position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+}
+.qs-size{ display:flex; align-items:center; gap:8px; }
+.qs-size button{
+  min-width:56px; min-height:52px; border:2px solid var(--rule); border-radius:10px;
+  background:var(--panel-bg); color:var(--ink); font-size:22px; font-weight:bold; cursor:pointer;
+  font-family:inherit;
+}
+.qs-size button:disabled{ opacity:.35; cursor:default; }
+.qs-size output{ min-width:44px; text-align:center; font-size:18px; }
+.qs-switch:focus-visible, .qs-size button:focus-visible, .qs-more:focus-visible{
+  outline:3px solid var(--gold); outline-offset:2px;
+}
+.qs-footer{ display:flex; gap:12px; margin-top:12px; }
+.qs-more{
+  flex:1; min-height:52px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--parchment); color:var(--ink); font-size:17px; cursor:pointer; font-family:inherit;
+}
+.qs-more.primary{ background:var(--rubric); color:#fbe9d9; border-color:var(--rubric); }
+
 /* Responsive */
 @media (max-width: 820px){
+  .qs-grid{ grid-template-columns:1fr; }
+  #quickSettings{ padding:12px; }
   #nav{ position:fixed; left:-280px; z-index:60; transition:left .25s ease; box-shadow:10px 0 30px rgba(0,0,0,.5); }
   #nav.open{ left:0; }
   #navToggle{ display:inline-block; }
@@ -424,9 +474,38 @@ ul.book-list li{ margin:0; }
         <button class="iconbtn" id="searchBtn" aria-label="Search the Bible">&#128269;<span class="btn-label">&nbsp;Search</span></button>
         <button class="iconbtn" id="readAloudBtn" aria-label="Read aloud">&#9835;<span class="btn-label">&nbsp;Read Aloud</span></button>
         <button class="iconbtn" id="artToggleBtn" aria-label="Toggle illustrations">&#127912;<span class="btn-label">Illustrations</span></button>
-        <button class="iconbtn" id="settingsBtn" aria-label="Settings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
+        <button class="iconbtn" id="settingsBtn" aria-label="Settings" aria-expanded="false" aria-controls="quickSettings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
       </div>
     </div>
+
+    <section id="quickSettings" aria-label="Quick settings" hidden>
+      <div class="qs-grid">
+        <div class="qs-item">
+          <span class="qs-label" id="qsSizeLbl"><span class="qs-icon" aria-hidden="true">A</span>Text size</span>
+          <span class="qs-size" role="group" aria-labelledby="qsSizeLbl">
+            <button type="button" id="qsSmaller" aria-label="Smaller text">A&minus;</button>
+            <output id="qsSizeOut" aria-live="polite">22</output>
+            <button type="button" id="qsBigger" aria-label="Bigger text">A+</button>
+          </span>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsDarkLbl"><span class="qs-icon" aria-hidden="true">&#127769;</span>Dark mode</span>
+          <button type="button" class="qs-switch" id="qsDark" role="switch" aria-checked="false" aria-labelledby="qsDarkLbl"></button>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsAutoReadLbl"><span class="qs-icon" aria-hidden="true">&#128266;</span>Read chapters aloud</span>
+          <button type="button" class="qs-switch" id="qsAutoRead" role="switch" aria-checked="false" aria-labelledby="qsAutoReadLbl"></button>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsPicturesLbl"><span class="qs-icon" aria-hidden="true">&#128444;</span>Pictures</span>
+          <button type="button" class="qs-switch" id="qsPictures" role="switch" aria-checked="true" aria-labelledby="qsPicturesLbl"></button>
+        </div>
+      </div>
+      <div class="qs-footer">
+        <button type="button" class="qs-more" id="qsMore">More settings&hellip;</button>
+        <button type="button" class="qs-more primary" id="qsDone">Done</button>
+      </div>
+    </section>
 
     <div class="page" id="pageEl">
       <div id="pageBody">
@@ -1487,6 +1566,7 @@ function applyTheme(){
   document.body.setAttribute("data-theme", state.theme);
   $("themeParchmentBtn").classList.toggle("active", state.theme==="parchment");
   $("themeStoneBtn").classList.toggle("active", state.theme==="stone");
+  if ($("qsDark")) syncQuickSettings();
 }
 var FONT_STACKS = {
   blackletter: "'UnifrakturMaguntia', serif",
@@ -1500,6 +1580,41 @@ function applyFontFamily(){
 function applyFontSize(){
   var s = $("pageBody").querySelector(".scripture");
   if (s) s.style.setProperty("--fs", state.fontSize+"px");
+}
+
+/* Shared setters so the quick-settings strip and the full Settings panel stay in step. */
+var FONT_MIN = 16, FONT_MAX = 34;
+function syncQuickSettings(){
+  $("qsSizeOut").textContent = state.fontSize;
+  $("qsSmaller").disabled = state.fontSize <= FONT_MIN;
+  $("qsBigger").disabled = state.fontSize >= FONT_MAX;
+  $("qsDark").setAttribute("aria-checked", state.theme==="stone" ? "true" : "false");
+  $("qsAutoRead").setAttribute("aria-checked", state.autoRead ? "true" : "false");
+  $("qsPictures").setAttribute("aria-checked", state.showArt ? "true" : "false");
+}
+function setFontSize(px){
+  state.fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, px)); saveState();
+  $("fontSizeRange").value = state.fontSize;
+  $("fontSizeLbl").textContent = state.fontSize+"px";
+  applyFontSize(); syncQuickSettings();
+}
+function setTheme(theme){
+  state.theme = theme; saveState(); applyTheme();
+}
+function setAutoRead(on){
+  state.autoRead = on; saveState();
+  $("autoReadCheck").checked = on; syncQuickSettings();
+}
+function setShowArt(on){
+  state.showArt = on; saveState();
+  $("artToggleBtn").classList.toggle("active-toggle", on);
+  $("showArtCheck").checked = on; syncQuickSettings();
+  openChapter(state.book, state.chapter);
+}
+function setQuickSettingsOpen(open){
+  $("quickSettings").hidden = !open;
+  $("settingsBtn").setAttribute("aria-expanded", open ? "true" : "false");
+  $("settingsBtn").classList.toggle("active-toggle", open);
 }
 function initSettingsUI(){
   $("musicVolRange").value = state.musicVol;
@@ -1565,14 +1680,8 @@ function initSettingsUI(){
   $("voiceSelect").addEventListener("change", function(e){
     state.narrVoice = e.target.value; saveState();
   });
-  $("autoReadCheck").addEventListener("change", function(e){
-    state.autoRead = e.target.checked; saveState();
-  });
-  $("showArtCheck").addEventListener("change", function(e){
-    state.showArt = e.target.checked; saveState();
-    $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
-    openChapter(state.book, state.chapter);
-  });
+  $("autoReadCheck").addEventListener("change", function(e){ setAutoRead(e.target.checked); });
+  $("showArtCheck").addEventListener("change", function(e){ setShowArt(e.target.checked); });
   $("showVerseNumCheck").addEventListener("change", function(e){
     state.showVerseNum = e.target.checked; saveState();
     var s = $("pageBody").querySelector(".scripture");
@@ -1585,21 +1694,27 @@ function initSettingsUI(){
     state.wakeLock = e.target.checked; saveState();
     applyWakeLock();
   });
-  $("fontSizeRange").addEventListener("input", function(e){
-    state.fontSize = parseInt(e.target.value,10); saveState();
-    $("fontSizeLbl").textContent = state.fontSize+"px";
-    applyFontSize();
-  });
+  $("fontSizeRange").addEventListener("input", function(e){ setFontSize(parseInt(e.target.value,10)); });
   $("fontFamilySelect").addEventListener("change", function(e){
     state.fontFamily = e.target.value; saveState();
     applyFontFamily();
   });
-  $("themeParchmentBtn").addEventListener("click", function(){ state.theme="parchment"; saveState(); applyTheme(); });
-  $("themeStoneBtn").addEventListener("click", function(){ state.theme="stone"; saveState(); applyTheme(); });
+  $("themeParchmentBtn").addEventListener("click", function(){ setTheme("parchment"); });
+  $("themeStoneBtn").addEventListener("click", function(){ setTheme("stone"); });
   $("downloadOfflineBtn").addEventListener("click", downloadForOffline);
   $("clearOfflineBtn").addEventListener("click", clearOfflineData);
 
-  $("settingsBtn").addEventListener("click", function(){ $("overlay").classList.add("open"); refreshOfflineStatusMessage(); });
+  /* The Settings button opens the quick-settings strip in the page flow (it pushes the
+     text down rather than covering it); the full list is one tap further, under "More settings". */
+  $("settingsBtn").addEventListener("click", function(){ setQuickSettingsOpen($("quickSettings").hidden); });
+  $("qsDone").addEventListener("click", function(){ setQuickSettingsOpen(false); $("settingsBtn").focus(); });
+  $("qsMore").addEventListener("click", function(){ $("overlay").classList.add("open"); refreshOfflineStatusMessage(); });
+  $("qsSmaller").addEventListener("click", function(){ setFontSize(state.fontSize-2); });
+  $("qsBigger").addEventListener("click", function(){ setFontSize(state.fontSize+2); });
+  $("qsDark").addEventListener("click", function(){ setTheme(state.theme==="stone" ? "parchment" : "stone"); });
+  $("qsAutoRead").addEventListener("click", function(){ setAutoRead(!state.autoRead); });
+  $("qsPictures").addEventListener("click", function(){ setShowArt(!state.showArt); });
+  syncQuickSettings();
   $("closeSettings").addEventListener("click", function(){ $("overlay").classList.remove("open"); });
   $("overlay").addEventListener("click", function(e){ if (e.target.id==="overlay") $("overlay").classList.remove("open"); });
 
@@ -1617,12 +1732,7 @@ function initSettingsUI(){
     searchDebounceTimer = setTimeout(function(){ renderSearchResults(val); }, 250);
   });
 
-  $("artToggleBtn").addEventListener("click", function(){
-    state.showArt = !state.showArt; saveState();
-    $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
-    $("showArtCheck").checked = state.showArt;
-    openChapter(state.book, state.chapter);
-  });
+  $("artToggleBtn").addEventListener("click", function(){ setShowArt(!state.showArt); });
   $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
 
   $("readAloudBtn").addEventListener("click", function(){ readChapterAloud(false); });
