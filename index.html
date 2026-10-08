@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-EUw67cIKwSmmjFTZDkc1CVd1cfuwAkeZ/CglJeO1oHY='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-nDCTXrs+MbZhVF0LpEcvw9QTzLfunSLEQ164r4cZC7c='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -203,6 +203,19 @@ ul.book-list li{ margin:0; }
 }
 .narration-download:hover{ background:rgba(0,0,0,.05); }
 .narration-download:disabled{ opacity:.6; cursor:default; }
+.tts-controls{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+.tts-btn{
+  min-width:48px; min-height:44px; padding:8px 14px; border-radius:6px;
+  background:var(--panel-bg); border:1px solid var(--rule); color:var(--ink);
+  font-family:'IM Fell English SC', serif; font-size:15px; letter-spacing:.04em; cursor:pointer;
+}
+.tts-btn.primary{ background:var(--rubric); border-color:var(--rubric); color:#fbe9d9; min-width:120px; }
+.tts-btn:disabled{ opacity:.5; cursor:default; }
+.tts-status{
+  font-family:'IM Fell English', serif; font-size:14px; color:var(--ink-soft); margin-top:8px;
+}
+.narration-fallback{ margin-top:10px; }
+.verse-reading{ background-color:rgba(201,162,74,.28); border-radius:3px; box-shadow:0 0 0 2px rgba(201,162,74,.28); }
 
 /* ---- Scripture text ---- */
 .scripture{
@@ -374,8 +387,58 @@ ul.book-list li{ margin:0; }
   font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:13px; cursor:pointer;
 }
 
+/* ---- Quick settings: sits in the page flow above the text, never on top of it ---- */
+#quickSettings{
+  width:100%; max-width:900px; margin:0 0 18px;
+  background:var(--panel-bg); border:1px solid var(--rule); border-radius:10px;
+  padding:16px; color:var(--ink);
+  font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Georgia, serif;
+}
+#quickSettings[hidden]{ display:none; }
+.qs-grid{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.qs-item{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  min-height:64px; padding:10px 14px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--parchment); font-size:19px; line-height:1.25;
+}
+.qs-item .qs-label{ display:flex; align-items:center; gap:10px; }
+.qs-item .qs-icon{ font-size:24px; width:28px; text-align:center; }
+.qs-switch{
+  flex:0 0 auto; position:relative; width:72px; height:40px; padding:0;
+  border:2px solid var(--rule); border-radius:22px; background:var(--rule); cursor:pointer;
+  transition:background .2s;
+}
+.qs-switch::before{
+  content:""; position:absolute; top:3px; left:3px; width:30px; height:30px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.4); transition:transform .2s;
+}
+.qs-switch[aria-checked="true"]{ background:var(--rubric); border-color:var(--rubric); }
+.qs-switch[aria-checked="true"]::before{ transform:translateX(32px); }
+.qs-switch .qs-state{
+  position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);
+}
+.qs-size{ display:flex; align-items:center; gap:8px; }
+.qs-size button{
+  min-width:56px; min-height:52px; border:2px solid var(--rule); border-radius:10px;
+  background:var(--panel-bg); color:var(--ink); font-size:22px; font-weight:bold; cursor:pointer;
+  font-family:inherit;
+}
+.qs-size button:disabled{ opacity:.35; cursor:default; }
+.qs-size output{ min-width:44px; text-align:center; font-size:18px; }
+.qs-switch:focus-visible, .qs-size button:focus-visible, .qs-more:focus-visible{
+  outline:3px solid var(--gold); outline-offset:2px;
+}
+.qs-footer{ display:flex; gap:12px; margin-top:12px; }
+.qs-more{
+  flex:1; min-height:52px; border:1px solid var(--rule); border-radius:10px;
+  background:var(--parchment); color:var(--ink); font-size:17px; cursor:pointer; font-family:inherit;
+}
+.qs-more.primary{ background:var(--rubric); color:#fbe9d9; border-color:var(--rubric); }
+
 /* Responsive */
 @media (max-width: 820px){
+  .qs-grid{ grid-template-columns:1fr; }
+  #quickSettings{ padding:12px; }
   #nav{ position:fixed; left:-280px; z-index:60; transition:left .25s ease; box-shadow:10px 0 30px rgba(0,0,0,.5); }
   #nav.open{ left:0; }
   #navToggle{ display:inline-block; }
@@ -399,6 +462,96 @@ ul.book-list li{ margin:0; }
 #navBackdrop{
   display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:55;
 }
+
+/* ---- iPhone / home-screen app: keep content clear of the notch and status bar ---- */
+[hidden]{ display:none !important; }
+#reader-wrap{ padding-top:max(34px, calc(env(safe-area-inset-top) + 12px)); }
+#nav{ padding-top:max(22px, calc(env(safe-area-inset-top) + 12px)); }
+.install-tip{
+  width:100%; max-width:900px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;
+  margin:0 0 14px; padding:12px 14px; background:var(--panel-bg); border:1px solid var(--rule);
+  color:var(--ink); font-family:'IM Fell English', serif; font-size:16px; line-height:1.4;
+}
+.install-tip span{ flex:1 1 220px; }
+.install-tip button{
+  min-height:44px; padding:8px 14px; border:1px solid var(--rule); background:none; color:var(--ink);
+  font-family:'IM Fell English SC', serif; font-size:14px; letter-spacing:.05em; cursor:pointer;
+}
+.install-tip button.primary{ background:var(--rubric); border-color:var(--rubric); color:#fbe9d9; }
+
+/* ---- Notes under each chapter (part of the page, never on top of it) ---- */
+.chapter-note{ max-width:640px; margin:30px auto 0; border-top:1px solid var(--rule); padding-top:14px; }
+.chapter-note summary{
+  cursor:pointer; min-height:44px; display:flex; align-items:center; gap:8px;
+  font-family:'IM Fell English SC', serif; font-size:16px; letter-spacing:.05em; color:var(--rubric);
+}
+.chapter-note textarea{
+  width:100%; min-height:120px; margin-top:8px; padding:10px 12px; resize:vertical;
+  font-family:'IM Fell English', Georgia, serif; font-size:17px; line-height:1.5;
+  background:rgba(255,255,255,.35); color:var(--ink); border:1px solid var(--rule); border-radius:3px;
+}
+[data-theme="stone"] .chapter-note textarea{ background:rgba(0,0,0,.25); }
+.chapter-note .note-saved{ font-family:'IM Fell English', serif; font-style:italic; font-size:13px; color:var(--ink-soft); margin-top:4px; min-height:1.2em; }
+#notesList h3{
+  font-family:'IM Fell English SC', serif; color:var(--rubric); font-size:16px; letter-spacing:.06em;
+  margin:22px 0 4px; text-align:center;
+}
+.note-preview{ display:block; font-size:13px; color:var(--ink-soft); font-style:italic; margin-top:2px; }
+
+/* ---- Account & sync panel (shares overlay pattern with settings) ---- */
+#overlay4{
+  position:fixed; inset:0; background:rgba(0,0,0,.55); display:none;
+  align-items:center; justify-content:center; z-index:50;
+}
+#overlay4.open{ display:flex; }
+#accountPanel{
+  width:440px; max-width:94vw; max-height:88vh; max-height:88dvh; overflow-y:auto;
+  background:var(--panel-bg); border:1px solid var(--rule); box-shadow:0 20px 60px rgba(0,0,0,.6);
+  padding:26px 26px 22px; color:var(--ink); font-family:'IM Fell English', serif;
+}
+#accountPanel h2{
+  font-family:'UnifrakturMaguntia', serif; color:var(--rubric); margin:0 0 10px; font-size:28px; text-align:center;
+}
+.account-intro{ font-size:16px; line-height:1.5; margin:0 0 14px; }
+.account-msg{ font-size:16px; line-height:1.45; margin:0 0 12px; padding:10px 12px; border-left:4px solid var(--gold); background:rgba(0,0,0,.04); }
+.account-msg:empty{ display:none; }
+.account-msg.error{ border-left-color:var(--rubric); }
+#accountPanel label.field{ display:block; font-family:'IM Fell English SC', serif; font-size:15px; letter-spacing:.04em; margin:10px 0 4px; }
+#accountPanel input[type=email], #accountPanel input[type=password]{
+  width:100%; min-height:46px; padding:10px 12px; font-size:17px; font-family:-apple-system, Segoe UI, Roboto, sans-serif;
+  background:var(--parchment); color:var(--ink); border:1px solid var(--rule); border-radius:4px;
+}
+.account-btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top:16px; }
+.account-btns button, .account-wide{
+  flex:1 1 140px; min-height:48px; padding:10px 14px; cursor:pointer; border-radius:4px;
+  font-family:'IM Fell English SC', serif; font-size:16px; letter-spacing:.05em;
+  background:none; color:var(--ink); border:1px solid var(--rule);
+}
+.account-btns button.primary{ background:var(--rubric); color:#fbe9d9; border-color:var(--rubric); }
+.account-btns button:disabled{ opacity:.6; cursor:default; }
+.linkbtn{
+  background:none; border:none; padding:10px 0; min-height:44px; cursor:pointer; color:var(--rubric);
+  font-family:'IM Fell English', serif; font-size:15px; text-decoration:underline;
+}
+.account-facts{ font-size:16px; line-height:1.6; margin:0 0 6px; }
+.account-facts b{ word-break:break-all; }
+.account-check{ display:flex; gap:10px; align-items:flex-start; font-size:15px; margin-top:12px; cursor:pointer; }
+.account-check input{ width:22px; height:22px; flex:0 0 22px; margin:0; }
+.danger-zone{ border-top:1px solid var(--rule); margin-top:18px; padding-top:8px; }
+.danger-zone .account-btns button.primary{ background:#7a1010; }
+#closeAccount{
+  width:100%; margin-top:16px; min-height:48px; padding:10px; background:var(--rubric); color:#fbe9d9; border:none;
+  font-family:'IM Fell English SC', serif; letter-spacing:.08em; font-size:15px; cursor:pointer;
+}
+/* Phones: the Index button gets its own line and every action keeps a full-size tap target. */
+@media (max-width: 520px){
+  #reader-wrap{ padding-left:max(12px, env(safe-area-inset-left)); padding-right:max(12px, env(safe-area-inset-right)); }
+  #topbar{ flex-wrap:wrap; gap:8px; }
+  #topbar .actions{ width:100%; justify-content:space-between; }
+  #topbar .iconbtn{ min-width:44px; min-height:44px; padding:8px 6px; font-size:18px; }
+  #navToggle{ min-height:44px; font-size:15px; }
+}
+#accountBtn.signed-in{ border-color:var(--gold); box-shadow:inset 0 -3px 0 var(--gold); }
 </style>
 </head>
 <body data-theme="parchment">
@@ -424,8 +577,44 @@ ul.book-list li{ margin:0; }
         <button class="iconbtn" id="searchBtn" aria-label="Search the Bible">&#128269;<span class="btn-label">&nbsp;Search</span></button>
         <button class="iconbtn" id="readAloudBtn" aria-label="Read aloud">&#9835;<span class="btn-label">&nbsp;Read Aloud</span></button>
         <button class="iconbtn" id="artToggleBtn" aria-label="Toggle illustrations">&#127912;<span class="btn-label">Illustrations</span></button>
-        <button class="iconbtn" id="settingsBtn" aria-label="Settings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
+        <button class="iconbtn" id="accountBtn" aria-label="Account and sync">&#128100;<span class="btn-label">&nbsp;Account</span></button>
+        <button class="iconbtn" id="settingsBtn" aria-label="Settings" aria-expanded="false" aria-controls="quickSettings">&#9881;<span class="btn-label">&nbsp;Settings</span></button>
       </div>
+    </div>
+
+    <section id="quickSettings" aria-label="Quick settings" hidden>
+      <div class="qs-grid">
+        <div class="qs-item">
+          <span class="qs-label" id="qsSizeLbl"><span class="qs-icon" aria-hidden="true">A</span>Text size</span>
+          <span class="qs-size" role="group" aria-labelledby="qsSizeLbl">
+            <button type="button" id="qsSmaller" aria-label="Smaller text">A&minus;</button>
+            <output id="qsSizeOut" aria-live="polite">22</output>
+            <button type="button" id="qsBigger" aria-label="Bigger text">A+</button>
+          </span>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsDarkLbl"><span class="qs-icon" aria-hidden="true">&#127769;</span>Dark mode</span>
+          <button type="button" class="qs-switch" id="qsDark" role="switch" aria-checked="false" aria-labelledby="qsDarkLbl"></button>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsAutoReadLbl"><span class="qs-icon" aria-hidden="true">&#128266;</span>Read chapters aloud</span>
+          <button type="button" class="qs-switch" id="qsAutoRead" role="switch" aria-checked="false" aria-labelledby="qsAutoReadLbl"></button>
+        </div>
+        <div class="qs-item">
+          <span class="qs-label" id="qsPicturesLbl"><span class="qs-icon" aria-hidden="true">&#128444;</span>Pictures</span>
+          <button type="button" class="qs-switch" id="qsPictures" role="switch" aria-checked="true" aria-labelledby="qsPicturesLbl"></button>
+        </div>
+      </div>
+      <div class="qs-footer">
+        <button type="button" class="qs-more" id="qsMore">More settings&hellip;</button>
+        <button type="button" class="qs-more primary" id="qsDone">Done</button>
+      </div>
+    </section>
+
+    <div class="install-tip" id="installTip" hidden>
+      <span id="installTipText"></span>
+      <button class="primary" id="installTipBtn" hidden>Install</button>
+      <button id="installTipClose">Got it</button>
     </div>
 
     <div class="page" id="pageEl">
@@ -550,8 +739,9 @@ ul.book-list li{ margin:0; }
       playlist stream from archive.org, the engravings load from Wikimedia
       Commons, and the fonts from Google Fonts &mdash; those services see
       your IP address when they send these files, as any website does. The
-      ambient drone is generated in your browser, and your settings and
-      bookmarks are stored only on this device.
+      ambient drone is generated in your browser, and your settings,
+      bookmarks and notes are stored on this device. If you sign in (Account),
+      they are also kept in your account so your other devices can use them.
     </div>
   </div>
 </div>
@@ -560,6 +750,7 @@ ul.book-list li{ margin:0; }
   <div id="bookmarksPanel">
     <h2>Bookmarks</h2>
     <div id="bookmarksList"></div>
+    <div id="notesList"></div>
     <button id="closeBookmarks">Close</button>
   </div>
 </div>
@@ -571,6 +762,62 @@ ul.book-list li{ margin:0; }
     <div class="search-status" id="searchStatus"></div>
     <div id="searchResults"></div>
     <button id="closeSearch">Close</button>
+  </div>
+</div>
+
+<div id="overlay4">
+  <div id="accountPanel" role="dialog" aria-modal="true" aria-labelledby="accountTitle">
+    <h2 id="accountTitle">Your Account</h2>
+    <p class="account-intro" id="accountIntro">You can read, listen and save bookmarks without an account.
+      Sign in to keep your bookmarks, notes, reading place and settings the same on your phone, tablet and computer.</p>
+    <div class="account-msg" id="accountMsg" role="status" aria-live="polite"></div>
+
+    <div id="accountOff" hidden>
+      <p class="account-intro">Sign-in is not switched on for this copy of the app yet.
+        Everything still works, and your bookmarks, notes and settings are saved on this device.</p>
+    </div>
+
+    <form id="signInForm" hidden novalidate>
+      <label class="field" for="authEmail">Email</label>
+      <input type="email" id="authEmail" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" required>
+      <label class="field" for="authPassword">Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" minlength="6" required>
+      <label class="account-check"><input type="checkbox" id="showPassword"><span>Show password</span></label>
+      <div class="account-btns">
+        <button type="submit" class="primary" id="signInBtn">Sign In</button>
+        <button type="button" id="signUpBtn">Create Account</button>
+      </div>
+      <button type="button" class="linkbtn" id="forgotBtn">Forgot your password?</button>
+    </form>
+
+    <form id="newPasswordForm" hidden novalidate>
+      <label class="field" for="newPassword">Choose a new password</label>
+      <input type="password" id="newPassword" autocomplete="new-password" minlength="6" required>
+      <div class="account-btns"><button type="submit" class="primary" id="savePasswordBtn">Save New Password</button></div>
+    </form>
+
+    <div id="signedInBox" hidden>
+      <p class="account-facts">Signed in as <b id="accountEmail"></b></p>
+      <p class="account-facts" id="syncStatus"></p>
+      <div class="account-btns">
+        <button type="button" class="primary" id="syncNowBtn">Sync Now</button>
+        <button type="button" id="signOutBtn">Sign Out</button>
+      </div>
+      <label class="account-check"><input type="checkbox" id="signOutWipe"><span>When I sign out, also remove my bookmarks, notes and reading place from this device (for shared phones and tablets)</span></label>
+      <div class="danger-zone">
+        <button type="button" class="linkbtn" id="deleteAccountBtn">Delete my account&hellip;</button>
+        <div id="deleteConfirm" hidden>
+          <p class="account-facts">This permanently deletes your account and the copy of your bookmarks, notes and settings kept with it. This device keeps its own copy.</p>
+          <div class="account-btns">
+            <button type="button" class="primary" id="deleteYesBtn">Yes, Delete It</button>
+            <button type="button" id="deleteNoBtn">Keep My Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="account-facts" id="readingProgress"></p>
+    <button id="closeAccount">Close</button>
   </div>
 </div>
 
@@ -627,6 +874,257 @@ var ART = {
   "Matthew 5":   {f:"Dore Bible Sermon on the Mount.jpg", t:"The Sermon on the Mount"},
   "Luke 15":     {f:"Gustave Dore - The prodigal son decides to return to his father.jpg", t:"The Prodigal Son Returns"}
 };
+
+/* A picture for every chapter. Each line is "chapter scene Title": the
+   scene (a drawing in art/scenes/) and title apply from that chapter until
+   the next line, so every chapter of every book is covered. Chapters with a
+   Doré engraving in ART show that instead, and fall back to the drawing if
+   it can't load (for example when offline). */
+var PICTURES = {
+  "Genesis": ["1 creation The Creation", "2 garden The Garden of Eden", "3 garden The Fall", "4 altar Cain and Abel",
+    "5 genealogy The Generations of Adam", "6 ark Noah Builds the Ark", "7 ark The Flood", "8 ark The Waters Recede",
+    "9 ark The Rainbow Covenant", "10 genealogy The Nations after the Flood", "11 tower The Tower of Babel",
+    "12 tents The Call of Abram", "13 shepherd Abram and Lot Part", "14 battle Abram Rescues Lot",
+    "15 tents The Stars of Heaven", "16 well Hagar in the Wilderness", "17 tents The Covenant of Abraham",
+    "18 tents Three Visitors", "19 exile Sodom Destroyed", "20 tents Abraham and Abimelech", "21 well Isaac Is Born",
+    "22 altar The Offering of Isaac", "23 tents The Burial of Sarah", "24 well Rebekah at the Well",
+    "25 tents Esau Sells His Birthright", "26 well Isaac's Wells", "27 tents Jacob Receives the Blessing",
+    "28 ladder Jacob's Ladder", "29 well Jacob Meets Rachel", "30 shepherd Jacob's Flocks", "31 shepherd Jacob Leaves Laban",
+    "32 tents Jacob Wrestles with the Angel", "33 shepherd Jacob and Esau Meet", "34 tents Dinah and Shechem",
+    "35 altar Jacob Returns to Bethel", "36 genealogy The Generations of Esau", "37 well Joseph Sold by His Brothers",
+    "38 tents Judah and Tamar", "39 egypt Joseph in Potiphar's House", "40 egypt Joseph in Prison", "41 king Pharaoh's Dreams",
+    "42 egypt Joseph's Brothers Go Down to Egypt", "43 egypt Benjamin Comes to Egypt", "44 egypt The Silver Cup",
+    "45 egypt Joseph Makes Himself Known", "46 egypt Jacob Goes into Egypt", "47 egypt Israel in Goshen",
+    "48 tents Jacob Blesses Joseph's Sons", "49 tents Jacob Blesses His Sons", "50 egypt The Death of Joseph"],
+  "Exodus": ["1 egypt Israel Oppressed in Egypt", "2 egypt Moses in the Bulrushes", "3 bush The Burning Bush",
+    "4 bush The Signs Given to Moses", "5 king Moses before Pharaoh", "7 egypt The Plagues of Egypt",
+    "12 egypt The Passover", "13 wilderness The Pillar of Cloud and Fire", "14 redsea Crossing the Red Sea",
+    "15 redsea The Song of Moses", "16 wilderness Manna from Heaven", "17 wilderness Water from the Rock",
+    "18 wilderness Jethro Visits Moses", "19 sinai Mount Sinai", "20 sinai The Ten Commandments",
+    "21 scroll Laws for Israel", "24 sinai The Covenant Sealed", "25 tabernacle Plans for the Tabernacle",
+    "32 altar The Golden Calf", "33 tabernacle The Tent of Meeting", "34 sinai New Tablets of Stone",
+    "35 tabernacle Building the Tabernacle", "40 tabernacle The Glory Fills the Tabernacle"],
+  "Leviticus": ["1 altar The Offerings", "8 tabernacle Aaron Made Priest", "10 altar Nadab and Abihu",
+    "11 scroll Clean and Unclean", "16 tabernacle The Day of Atonement", "17 scroll The Law of Holiness",
+    "23 harvest The Feasts of the Lord", "25 harvest The Year of Jubilee", "26 scroll Blessings and Warnings"],
+  "Numbers": ["1 wilderness The Numbering of Israel", "6 tabernacle The Priestly Blessing", "9 wilderness The Cloud over the Tabernacle",
+    "11 wilderness Quails in the Camp", "13 vineyard The Twelve Spies", "14 wilderness Forty Years in the Wilderness",
+    "16 wilderness The Rebellion of Korah", "17 tabernacle Aaron's Rod Blossoms", "20 wilderness Water from the Rock",
+    "21 wilderness The Serpent of Brass", "22 prophet Balaam and the Angel", "25 wilderness Israel at Peor",
+    "26 genealogy The Second Numbering", "27 prophet Joshua Chosen", "28 altar Offerings and Feasts",
+    "31 battle War with Midian", "32 shepherd The Tribes beyond Jordan", "33 wilderness The Journeys of Israel",
+    "34 wilderness The Borders of the Land"],
+  "Deuteronomy": ["1 prophet Moses Speaks to Israel", "5 sinai The Ten Commandments Repeated", "6 scroll Hear, O Israel",
+    "7 scroll A Holy People", "12 scroll Laws for the Land", "27 sinai Blessings and Curses", "29 scroll The Covenant Renewed",
+    "31 prophet Joshua Charged", "32 prophet The Song of Moses", "33 prophet Moses Blesses the Tribes",
+    "34 prophet The Death of Moses"],
+  "Joshua": ["1 prophet Be Strong and of a Good Courage", "2 jericho Rahab and the Spies", "3 redsea Crossing the Jordan",
+    "4 altar Twelve Stones", "5 battle The Captain of the Lord's Host", "6 jericho The Walls of Jericho Fall",
+    "7 battle Achan's Sin", "8 battle The Taking of Ai", "9 battle The Gibeonites", "10 battle The Sun Stands Still",
+    "11 battle The Conquest of the North", "12 genealogy The Kings Defeated", "13 shepherd Dividing the Land",
+    "20 jericho Cities of Refuge", "22 altar The Altar by Jordan", "23 prophet Joshua's Farewell",
+    "24 prophet Choose You This Day"],
+  "Judges": ["1 battle Israel among the Nations", "3 battle Ehud and Shamgar", "4 battle Deborah and Barak",
+    "5 harp The Song of Deborah", "6 altar Gideon Called", "7 battle Gideon's Three Hundred", "8 battle Gideon Pursues Midian",
+    "9 king Abimelech", "10 battle Israel Oppressed", "11 battle Jephthah", "13 altar Samson's Birth Foretold",
+    "14 harvest Samson and the Lion", "15 battle Samson and the Philistines", "16 temple Samson and Delilah",
+    "17 tents Micah's Idols", "19 battle Civil War in Israel"],
+  "Ruth": ["1 tents Ruth Stays with Naomi", "2 harvest Ruth Gleans in Boaz's Field", "3 harvest Ruth at the Threshing Floor",
+    "4 genealogy Boaz Marries Ruth"],
+  "1 Samuel": ["1 temple Hannah's Prayer", "2 harp Hannah's Song", "3 temple The Lord Calls Samuel", "4 battle The Ark Is Taken",
+    "5 temple The Ark among the Philistines", "6 harvest The Ark Returns", "7 altar Samuel Judges Israel",
+    "8 king Israel Asks for a King", "9 prophet Saul Meets Samuel", "10 king Saul Anointed King", "11 battle Saul Saves Jabesh",
+    "12 prophet Samuel's Farewell", "13 battle War with the Philistines", "14 battle Jonathan's Victory",
+    "15 prophet Saul Rejected", "16 shepherd David Anointed", "17 battle David and Goliath", "18 king David and Jonathan",
+    "19 king Saul Seeks David", "20 shepherd Jonathan's Arrows", "21 temple David Flees", "22 battle The Cave of Adullam",
+    "24 battle David Spares Saul", "25 shepherd David and Abigail", "26 battle David Spares Saul Again",
+    "27 battle David among the Philistines", "28 prophet Saul and the Witch of Endor", "29 battle David Sent Away",
+    "30 battle David Recovers All", "31 battle The Death of Saul"],
+  "2 Samuel": ["1 harp David Mourns Saul and Jonathan", "2 king David King of Judah", "3 battle Abner and Joab",
+    "5 king David King of All Israel", "6 tabernacle The Ark Brought to Jerusalem", "7 king God's Promise to David",
+    "8 battle David's Victories", "9 king Kindness to Mephibosheth", "10 battle War with Ammon", "11 king David and Bathsheba",
+    "12 prophet Nathan Rebukes David", "13 king Amnon and Absalom", "15 king Absalom's Rebellion", "16 battle David Flees",
+    "18 battle The Death of Absalom", "19 king David Returns", "20 battle Sheba's Revolt", "21 battle The Giants Fall",
+    "22 harp David's Song of Deliverance", "23 harp The Last Words of David", "24 altar David's Altar"],
+  "1 Kings": ["1 king Solomon Anointed King", "2 king David's Charge to Solomon", "3 king The Wisdom of Solomon",
+    "4 king Solomon's Kingdom", "5 temple Preparing to Build the Temple", "6 temple Solomon Builds the Temple",
+    "7 king Solomon's House", "8 temple The Temple Dedicated", "9 temple God Appears to Solomon",
+    "10 queen The Queen of Sheba", "11 king Solomon Turns Away", "12 king The Kingdom Divided", "13 prophet The Man of God from Judah",
+    "14 prophet Ahijah's Prophecy", "15 king Kings of Judah and Israel", "17 prophet Elijah Fed by Ravens",
+    "18 altar Elijah on Mount Carmel", "19 prophet The Still Small Voice", "20 battle Ahab and Ben-hadad",
+    "21 vineyard Naboth's Vineyard", "22 battle The Death of Ahab"],
+  "2 Kings": ["1 prophet Elijah and Ahaziah", "2 chariot Elijah Taken up to Heaven", "3 battle Water in the Valley",
+    "4 prophet Elisha's Miracles", "5 healing Naaman Healed", "6 battle The Chariots of Fire", "7 battle The Siege of Samaria",
+    "8 prophet Elisha and Hazael", "9 king Jehu Anointed", "11 temple Joash Made King", "12 temple Repairing the Temple",
+    "13 prophet The Death of Elisha", "14 king Kings of Judah and Israel", "17 exile Israel Taken Captive",
+    "18 king Hezekiah", "19 temple Hezekiah's Prayer", "20 prophet Hezekiah's Life Lengthened", "21 king Manasseh",
+    "22 scroll The Book of the Law Found", "23 temple Josiah's Reforms", "24 exile Jerusalem Besieged",
+    "25 exile Jerusalem Falls"],
+  "1 Chronicles": ["1 genealogy The Generations from Adam", "10 battle The Death of Saul", "11 king David King over Israel",
+    "13 tabernacle The Ark Moved", "15 tabernacle The Ark Comes to Jerusalem", "16 harp David's Psalm of Thanks",
+    "17 king God's Promise to David", "18 battle David's Victories", "21 altar David's Altar", "22 temple Preparing for the Temple",
+    "23 temple The Levites and Priests", "27 genealogy David's Officers", "28 king David's Charge to Solomon",
+    "29 king The Gifts for the Temple"],
+  "2 Chronicles": ["1 king Solomon Asks for Wisdom", "2 temple Building the Temple", "5 temple The Glory Fills the Temple",
+    "6 temple Solomon's Prayer", "8 king Solomon's Works", "9 queen The Queen of Sheba", "10 king The Kingdom Divided",
+    "13 battle Abijah's Victory", "14 battle Asa Trusts the Lord", "17 king Jehoshaphat", "20 harp Jehoshaphat's Singers",
+    "21 king Kings of Judah", "23 temple Joash Crowned", "24 temple Joash Repairs the Temple", "25 king Kings of Judah",
+    "29 temple Hezekiah Cleanses the Temple", "30 tabernacle Hezekiah's Passover", "32 battle Sennacherib Invades",
+    "33 king Manasseh Repents", "34 scroll The Book of the Law Found", "35 tabernacle Josiah's Passover",
+    "36 exile The Fall of Jerusalem"],
+  "Ezra": ["1 rebuild The Return from Exile", "2 genealogy Those Who Returned", "3 temple The Foundation Laid",
+    "4 rebuild The Work Opposed", "6 temple The Temple Finished", "7 scroll Ezra Comes to Jerusalem", "9 prophet Ezra's Prayer"],
+  "Nehemiah": ["1 king Nehemiah's Prayer", "2 rebuild Nehemiah Inspects the Walls", "3 rebuild Rebuilding the Walls",
+    "4 rebuild Building with Sword and Trowel", "5 rebuild Nehemiah Helps the Poor", "6 rebuild The Wall Finished",
+    "7 genealogy The Register of the Returned", "8 scroll Ezra Reads the Law", "9 prophet The People Confess",
+    "11 genealogy Living in Jerusalem", "12 harp The Wall Dedicated", "13 temple Nehemiah's Reforms"],
+  "Esther": ["1 king The Feast of Ahasuerus", "2 queen Esther Made Queen", "3 king Haman's Plot", "4 queen For Such a Time as This",
+    "5 queen Esther Goes before the King", "6 king Mordecai Honored", "7 queen Haman's Downfall", "8 king The King's Decree",
+    "9 harp The Feast of Purim"],
+  "Job": ["1 whirlwind Job Tested", "2 whirlwind Job's Patience", "3 whirlwind Job's Lament", "4 whirlwind Job's Friends Speak",
+    "38 whirlwind The Lord Answers out of the Whirlwind", "42 shepherd Job Restored"],
+  "Psalms": ["1 tree The Blessed Man", "2 king The Lord's Anointed", "3 harp A Psalm of David", "8 creation How Excellent Is Thy Name",
+    "9 harp A Psalm of Praise", "19 creation The Heavens Declare the Glory of God", "20 harp A Psalm of David",
+    "22 cross My God, My God", "23 shepherd The Lord Is My Shepherd", "24 temple The King of Glory", "25 harp A Psalm of David",
+    "42 well As the Hart Panteth", "43 harp A Psalm", "46 rebuild God Is Our Refuge", "47 harp A Psalm of Praise",
+    "51 prophet Create in Me a Clean Heart", "52 harp A Psalm", "84 temple How Amiable Are Thy Tabernacles",
+    "85 harp A Psalm", "90 prophet A Prayer of Moses", "91 harp Under the Shadow of the Almighty", "92 harp A Psalm",
+    "100 harp Make a Joyful Noise", "101 harp A Psalm", "103 harp Bless the Lord, O My Soul", "104 creation The Works of Creation",
+    "105 harp Remembering God's Wonders", "107 storm They That Go Down to the Sea", "108 harp A Psalm",
+    "119 scroll Thy Word Is a Lamp", "120 temple A Song of Degrees", "121 shepherd I Will Lift up Mine Eyes",
+    "122 temple A Song of Degrees", "137 exile By the Rivers of Babylon", "138 harp A Psalm of David",
+    "139 creation Fearfully and Wonderfully Made", "140 harp A Psalm of David", "148 creation Praise Him, Sun and Moon",
+    "149 harp Praise Ye the Lord", "150 harp Let Every Thing That Hath Breath Praise the Lord"],
+  "Proverbs": ["1 lamp The Beginning of Knowledge", "3 lamp Trust in the Lord", "8 lamp Wisdom Calls", "10 lamp The Proverbs of Solomon",
+    "31 harvest The Virtuous Woman"],
+  "Ecclesiastes": ["1 lamp Vanity of Vanities", "3 harvest A Time for Every Purpose", "4 lamp The Preacher's Words",
+    "12 lamp Remember Thy Creator"],
+  "Song of Solomon": ["1 vineyard The Song of Songs"],
+  "Isaiah": ["1 prophet The Vision of Isaiah", "2 temple The Mountain of the Lord", "3 prophet Judgment on Judah",
+    "6 temple Isaiah's Vision of the Lord", "7 nativity A Virgin Shall Conceive", "8 prophet The Prophet's Signs",
+    "9 nativity Unto Us a Child Is Born", "10 prophet Judgment and Hope", "11 shepherd The Peaceable Kingdom",
+    "12 harp A Song of Praise", "13 exile Burdens upon the Nations", "24 prophet The Earth Made Empty", "25 harp A Song of Victory",
+    "26 harp A Song in Judah", "27 vineyard The Vineyard of the Lord", "28 prophet Woe to Ephraim", "35 wilderness The Desert Shall Blossom",
+    "36 battle Sennacherib Threatens Jerusalem", "37 temple Hezekiah's Prayer", "38 prophet Hezekiah's Sickness",
+    "39 king Envoys from Babylon", "40 shepherd Comfort Ye My People", "41 prophet Fear Thou Not", "44 prophet Idols Are Vain",
+    "45 prophet Cyrus the Lord's Anointed", "46 prophet Bel Boweth Down", "52 rebuild How Beautiful upon the Mountains",
+    "53 cross The Suffering Servant", "54 tents Enlarge the Place of Thy Tent", "55 well Ho, Every One That Thirsteth",
+    "56 temple A House of Prayer", "58 prophet The True Fast", "60 newjerusalem Arise, Shine", "61 prophet Good Tidings to the Meek",
+    "62 newjerusalem Zion's Salvation", "63 prophet The Lord's Day of Vengeance", "65 newjerusalem New Heavens and a New Earth"],
+  "Jeremiah": ["1 prophet The Call of Jeremiah", "2 prophet Israel Forsakes the Lord", "7 temple The Temple Sermon",
+    "8 prophet The Weeping Prophet", "13 prophet The Linen Girdle", "18 prophet The Potter's House", "19 prophet The Broken Bottle",
+    "20 prophet Jeremiah in the Stocks", "21 battle Jerusalem's Doom", "23 shepherd The Righteous Branch", "24 vineyard Two Baskets of Figs",
+    "25 exile Seventy Years of Captivity", "26 temple Jeremiah on Trial", "27 prophet The Yoke of Babylon", "29 letter Letter to the Exiles",
+    "30 rebuild Restoration Promised", "31 rebuild The New Covenant", "32 prophet Jeremiah Buys a Field", "33 rebuild Health and Cure",
+    "34 prophet Warnings to Zedekiah", "36 scroll The King Burns the Scroll", "37 prophet Jeremiah Imprisoned",
+    "38 prophet Jeremiah in the Dungeon", "39 exile Jerusalem Taken", "40 exile The Remnant in Judah", "43 egypt The Flight into Egypt",
+    "46 battle Prophecies against the Nations", "50 exile The Fall of Babylon", "52 exile The Fall of Jerusalem"],
+  "Lamentations": ["1 exile How Doth the City Sit Solitary", "3 prophet His Mercies Are New Every Morning", "4 exile Zion's Sorrow",
+    "5 prophet A Prayer for Mercy"],
+  "Ezekiel": ["1 throne Ezekiel's Vision of God", "2 scroll Ezekiel Eats the Scroll", "4 prophet The Siege Acted Out",
+    "8 temple Visions in the Temple", "10 throne The Glory Departs", "11 prophet A New Spirit", "12 exile Signs of Exile",
+    "13 prophet False Prophets", "16 prophet Jerusalem's Unfaithfulness", "18 prophet The Soul That Sinneth",
+    "25 prophet Prophecies against the Nations", "27 voyage The Ships of Tyre", "29 egypt Against Egypt", "33 prophet The Watchman",
+    "34 shepherd The Good Shepherd", "36 rebuild A New Heart", "37 valley The Valley of Dry Bones", "38 battle Gog and Magog",
+    "40 temple The Vision of the New Temple", "47 temple The River from the Temple", "48 newjerusalem The Lord Is There"],
+  "Daniel": ["1 king Daniel in Babylon", "2 king Nebuchadnezzar's Dream", "3 furnace The Fiery Furnace",
+    "4 king The King Humbled", "5 king The Writing on the Wall", "6 lions Daniel in the Lions' Den",
+    "7 throne The Ancient of Days", "8 prophet The Ram and the Goat", "9 prophet Daniel's Prayer", "10 prophet The Vision by the River",
+    "12 seals The Time of the End"],
+  "Hosea": ["1 prophet Hosea's Marriage", "3 prophet Love Restored", "4 prophet The Lord's Controversy", "11 shepherd When Israel Was a Child",
+    "14 vineyard Return unto the Lord"],
+  "Joel": ["1 harvest The Locusts", "2 pentecost I Will Pour out My Spirit", "3 harvest The Valley of Decision"],
+  "Amos": ["1 shepherd The Herdsman of Tekoa", "3 prophet Judgment on Israel", "7 prophet The Plumbline", "8 harvest A Basket of Summer Fruit",
+    "9 rebuild The Tabernacle of David Raised"],
+  "Obadiah": ["1 prophet The Vision of Obadiah"],
+  "Jonah": ["1 storm Jonah Flees from the Lord", "2 fish Jonah and the Great Fish", "3 prophet Jonah Preaches to Nineveh",
+    "4 tree Jonah and the Gourd"],
+  "Micah": ["1 prophet Micah's Warning", "4 temple The Mountain of the Lord", "5 nativity Out of Bethlehem", "6 prophet What Doth the Lord Require",
+    "7 prophet Mercy and Pardon"],
+  "Nahum": ["1 prophet The Burden of Nineveh", "2 battle The Fall of Nineveh"],
+  "Habakkuk": ["1 prophet The Prophet's Question", "2 scroll Write the Vision", "3 harp Habakkuk's Prayer"],
+  "Zephaniah": ["1 prophet The Day of the Lord", "3 harp Sing, O Daughter of Zion"],
+  "Haggai": ["1 rebuild Build the House", "2 temple The Glory of the Latter House"],
+  "Zechariah": ["1 prophet Visions of the Night", "3 temple Joshua the High Priest", "4 lamp The Golden Candlestick",
+    "5 scroll The Flying Roll", "6 chariot The Four Chariots", "7 prophet Justice and Mercy", "8 rebuild Jerusalem Restored",
+    "9 king Thy King Cometh", "11 shepherd The Shepherds", "12 prophet Jerusalem Delivered", "14 newjerusalem The Lord Shall Be King"],
+  "Malachi": ["1 altar The Polluted Offerings", "2 prophet The Covenant of Levi", "3 temple The Messenger of the Covenant",
+    "4 creation The Sun of Righteousness"],
+  "Matthew": ["1 genealogy The Genealogy of Jesus", "2 nativity The Wise Men", "3 redsea John the Baptist", "4 wilderness The Temptation",
+    "5 mount The Sermon on the Mount", "8 healing Jesus Heals", "9 healing The Ruler's Daughter", "10 mount The Twelve Sent Out",
+    "11 mount Come unto Me", "12 harvest Lord of the Sabbath", "13 harvest The Parable of the Sower", "14 storm Jesus Walks on the Water",
+    "15 healing The Woman of Canaan", "16 mount Thou Art the Christ", "17 cloud The Transfiguration", "18 shepherd The Lost Sheep",
+    "19 healing Little Children", "20 vineyard The Labourers in the Vineyard", "21 temple The Triumphal Entry",
+    "22 supper The Wedding Feast", "23 temple Woes to the Pharisees", "24 mount The Mount of Olives", "25 lamp The Ten Virgins",
+    "26 supper The Last Supper", "27 cross The Crucifixion", "28 tomb He Is Risen"],
+  "Mark": ["1 redsea The Baptism of Jesus", "2 healing The Paralytic Healed", "3 mount The Twelve Chosen", "4 storm Jesus Stills the Storm",
+    "5 healing Jairus's Daughter", "6 harvest Feeding the Five Thousand", "7 healing Ephphatha", "8 harvest Feeding the Four Thousand",
+    "9 cloud The Transfiguration", "10 healing Blind Bartimaeus", "11 temple The Triumphal Entry", "12 vineyard The Wicked Husbandmen",
+    "13 mount Signs of the End", "14 supper The Last Supper", "15 cross The Crucifixion", "16 tomb He Is Risen"],
+  "Luke": ["1 temple The Angel Visits Zacharias", "2 nativity The Birth of Jesus", "3 redsea John the Baptist", "4 wilderness The Temptation",
+    "5 storm The Great Catch of Fish", "6 mount The Sermon on the Plain", "7 healing The Widow's Son Raised", "8 storm Jesus Calms the Storm",
+    "9 harvest Feeding the Five Thousand", "10 healing The Good Samaritan", "11 mount The Lord's Prayer", "12 harvest The Rich Fool",
+    "13 healing The Woman Made Straight", "14 supper The Great Supper", "15 shepherd The Lost Sheep and the Prodigal Son",
+    "16 king The Rich Man and Lazarus", "17 healing Ten Lepers Cleansed", "18 temple The Pharisee and the Publican",
+    "19 tree Zacchaeus", "20 vineyard The Wicked Husbandmen", "21 temple The Widow's Mites", "22 supper The Last Supper",
+    "23 cross The Crucifixion", "24 tomb The Road to Emmaus"],
+  "John": ["1 creation In the Beginning Was the Word", "2 supper The Wedding at Cana", "3 lamp Nicodemus", "4 well The Woman at the Well",
+    "5 healing The Pool of Bethesda", "6 harvest The Bread of Life", "7 temple The Feast of Tabernacles", "8 temple The Light of the World",
+    "9 healing The Man Born Blind", "10 shepherd The Good Shepherd", "11 tomb Lazarus Raised", "12 temple The Triumphal Entry",
+    "13 supper Jesus Washes the Disciples' Feet", "14 supper Let Not Your Heart Be Troubled", "15 vineyard The True Vine",
+    "16 supper The Comforter Promised", "17 mount Jesus Prays", "18 battle Jesus Betrayed", "19 cross The Crucifixion",
+    "20 tomb The Empty Tomb", "21 storm Breakfast by the Sea"],
+  "Acts": ["1 cloud The Ascension", "2 pentecost The Day of Pentecost", "3 healing The Lame Man Healed", "4 temple Peter and John Arrested",
+    "5 temple The Apostles in Prison", "6 mount Seven Deacons Chosen", "7 cross Stephen's Martyrdom", "8 healing Philip in Samaria",
+    "9 prophet Saul's Conversion", "10 prophet Peter and Cornelius", "11 healing The Church at Antioch", "12 temple Peter Delivered from Prison",
+    "13 voyage Paul's First Journey", "15 letter The Council at Jerusalem", "16 voyage Paul and Silas", "17 temple Paul at Athens",
+    "18 voyage Paul at Corinth", "19 healing Paul at Ephesus", "20 voyage Paul's Farewell", "21 temple Paul Arrested",
+    "22 prophet Paul's Defence", "23 king Paul before the Council", "24 king Paul before Felix", "25 king Paul before Festus",
+    "26 king Paul before Agrippa", "27 storm The Shipwreck", "28 voyage Paul at Rome"],
+  "Romans": ["1 letter The Epistle to the Romans", "8 cloud No Condemnation", "12 letter A Living Sacrifice", "16 letter Greetings to the Saints"],
+  "1 Corinthians": ["1 letter The First Epistle to the Corinthians", "11 supper The Lord's Supper", "12 pentecost Spiritual Gifts",
+    "13 lamp The Greatest of These Is Charity", "15 tomb The Resurrection", "16 letter Paul's Farewell"],
+  "2 Corinthians": ["1 letter The Second Epistle to the Corinthians", "4 lamp Treasure in Earthen Vessels", "5 letter New Creatures",
+    "11 storm Paul's Sufferings", "12 letter My Grace Is Sufficient"],
+  "Galatians": ["1 letter The Epistle to the Galatians", "5 vineyard The Fruit of the Spirit", "6 letter Bear Ye One Another's Burdens"],
+  "Ephesians": ["1 letter The Epistle to the Ephesians", "6 battle The Whole Armour of God"],
+  "Philippians": ["1 letter The Epistle to the Philippians", "2 cross The Mind of Christ", "3 letter Pressing toward the Mark",
+    "4 letter Rejoice in the Lord Alway"],
+  "Colossians": ["1 letter The Epistle to the Colossians"],
+  "1 Thessalonians": ["1 letter The First Epistle to the Thessalonians", "4 cloud The Coming of the Lord", "5 letter Children of Light"],
+  "2 Thessalonians": ["1 letter The Second Epistle to the Thessalonians"],
+  "1 Timothy": ["1 letter The First Epistle to Timothy"],
+  "2 Timothy": ["1 letter The Second Epistle to Timothy", "4 letter I Have Fought a Good Fight"],
+  "Titus": ["1 letter The Epistle to Titus"],
+  "Philemon": ["1 letter The Epistle to Philemon"],
+  "Hebrews": ["1 letter The Epistle to the Hebrews", "9 tabernacle The Better Tabernacle", "10 letter Hold Fast", "11 altar The Heroes of Faith",
+    "12 mount The Great Cloud of Witnesses", "13 letter Let Brotherly Love Continue"],
+  "James": ["1 letter The Epistle of James", "3 lamp Taming the Tongue", "5 harvest Be Patient"],
+  "1 Peter": ["1 letter The First Epistle of Peter", "5 shepherd Feed the Flock"],
+  "2 Peter": ["1 letter The Second Epistle of Peter", "3 cloud The Day of the Lord"],
+  "1 John": ["1 lamp God Is Light", "4 letter God Is Love"],
+  "2 John": ["1 letter The Second Epistle of John"],
+  "3 John": ["1 letter The Third Epistle of John"],
+  "Jude": ["1 letter The Epistle of Jude"],
+  "Revelation": ["1 lamp The Seven Golden Candlesticks", "2 letter Letters to the Seven Churches", "4 throne The Throne in Heaven",
+    "5 seals The Book with Seven Seals", "7 throne The Great Multitude", "8 seals The Seven Trumpets", "10 scroll The Little Book",
+    "11 temple The Two Witnesses", "12 prophet The Woman and the Dragon", "13 prophet The Beast", "14 harvest The Harvest of the Earth",
+    "15 harp The Song of Moses and the Lamb", "16 seals The Seven Vials", "17 exile Babylon the Great", "18 exile Babylon Is Fallen",
+    "19 battle The Rider on the White Horse", "20 throne The Great White Throne", "21 newjerusalem The New Jerusalem",
+    "22 newjerusalem The River of Life"]
+};
+
+/* The drawn picture for a chapter: the last PICTURES line at or before it. */
+function scenePicture(book, chapter){
+  var lines = PICTURES[book], best = null;
+  if (!lines) return null;
+  for (var i=0; i<lines.length; i++){
+    var m = /^(\d+) (\S+) (.+)$/.exec(lines[i]);
+    if (m && Number(m[1]) <= chapter) best = {scene:m[2], t:m[3]};
+  }
+  return best;
+}
+function sceneUrl(scene){ return "art/scenes/" + scene + ".svg"; }
 
 /* Archaic 1611-style titles, included only where we're confident of the
    original wording — left plain (still blackletter-styled) elsewhere
@@ -796,7 +1294,7 @@ var state = {
   book:"Genesis", chapter:1, fontSize:22, fontFamily:"blackletter", theme:"parchment",
   showArt:true, showVerseNum:true, musicVol:0.15, musicOn:true, musicTrack:"drone",
   narrVol:1, narrRate:0.85, narrVoice:"", narrSource:"auto", autoRead:false, swipeEnabled:true, wakeLock:false,
-  bookmarks:[]
+  bookmarks:[], notes:{}, readChapters:{}
 };
 
 function loadState(){
@@ -815,6 +1313,7 @@ function loadState(){
 }
 function saveState(){
   try{ localStorage.setItem("kjv1611-settings", JSON.stringify(state)); }catch(e){}
+  noteLocalChange();
 }
 
 /* ============================================================
@@ -941,6 +1440,7 @@ function closeNav(){
    ============================================================ */
 function openChapter(book, chapter){
   if (!BIBLE[book] || !BIBLE[book][chapter]) return;
+  markChapterRead(book, Number(chapter));
   state.book=book; state.chapter=Number(chapter); saveState();
 
   var verses = BIBLE[book][chapter];
@@ -958,18 +1458,35 @@ function openChapter(book, chapter){
   body.appendChild(el("span","rule-flourish"));
 
   var art = ART[book + " " + chapter];
+  var drawn = scenePicture(book, state.chapter);
   var artPanel = el("div"); artPanel.id="artPanel";
-  if (art && state.showArt){
+  if ((art || drawn) && state.showArt){
     var fig = el("figure");
     var img = document.createElement("img");
-    var artWidth = window.innerWidth<=820 ? 480 : 700;
-    img.src = commonsUrl(art.f, artWidth); img.alt = art.t; img.loading="lazy";
-    img.onerror = function(){
-      artPanel.innerHTML = "";
-      artPanel.appendChild(el("div","art-error","(Illustration failed to load \u2014 check your connection.)"));
+    var cap = el("figcaption");
+    var showDrawn = function(){
+      img.onerror = function(){ artPanel.innerHTML = ""; };
+      img.src = sceneUrl(drawn.scene); img.alt = drawn.t;
+      cap.textContent = drawn.t;
     };
+    img.loading="lazy";
+    if (art){
+      var artWidth = window.innerWidth<=820 ? 480 : 700;
+      img.src = commonsUrl(art.f, artWidth); img.alt = art.t;
+      cap.textContent = art.t + " \u2014 engraven by G. Dor\u00e9, 1866";
+      /* No connection to Wikimedia (offline, or blocked): show the drawing. */
+      img.onerror = function(){
+        if (drawn) showDrawn();
+        else {
+          artPanel.innerHTML = "";
+          artPanel.appendChild(el("div","art-error","(Illustration failed to load \u2014 check your connection.)"));
+        }
+      };
+    } else {
+      showDrawn();
+    }
     fig.appendChild(img);
-    fig.appendChild(el("figcaption","", art.t + " \u2014 engraven by G. Dor\u00e9, 1866"));
+    fig.appendChild(cap);
     artPanel.appendChild(fig);
     body.appendChild(artPanel);
   }
@@ -984,10 +1501,8 @@ function openChapter(book, chapter){
     var vSpan = el("span","verse");
     vSpan.id = "v-" + n;
     var sup = el("sup","vnum", n);
-    if (findLibrivoxFile(book, chapter)){
-      sup.title = "Start narration at verse " + n;
-      sup.addEventListener("click", function(){ seekNarrationToVerse(book, chapter, Number(n)); });
-    }
+    sup.title = "Read aloud from verse " + n;
+    sup.addEventListener("click", function(){ narrateFromVerse(book, chapter, Number(n)); });
     vSpan.appendChild(sup);
     var text = verses[n];
     if (i===0 && text.length){
@@ -1011,13 +1526,14 @@ function openChapter(book, chapter){
   foot.appendChild(prevBtn);
   foot.appendChild(el("div","folio", book+" "+toRoman(chapter)));
   foot.appendChild(nextBtn);
+  body.appendChild(buildChapterNote(book, state.chapter));
   body.appendChild(foot);
 
   updateNavHighlight();
   updateBookmarkBtn();
   $("pageEl").scrollIntoView({behavior:"instant", block:"start"});
   window.scrollTo(0,0);
-  if ("speechSynthesis" in window && speechSynthesis.speaking) speechSynthesis.cancel();
+  if (tts.book !== book || tts.chapter !== state.chapter) ttsStop();
   if (state.autoRead) readChapterAloud(true);
 }
 
@@ -1202,7 +1718,9 @@ function updateOfflineStatus(msg){
   if (s) s.textContent = msg;
 }
 function refreshOfflineStatusMessage(){
-  if (!("serviceWorker" in navigator)){
+  if (isNativeApp()){
+    updateOfflineStatus("The Bible text is built into this app and always works offline. Narration, music and engravings need an internet connection.");
+  } else if (!("serviceWorker" in navigator)){
     updateOfflineStatus("This browser doesn't support offline mode.");
   } else if (!navigator.serviceWorker.controller){
     updateOfflineStatus("Offline mode needs this page to be hosted (not opened as a local file). Once hosted, reload once and this will activate.");
@@ -1229,7 +1747,7 @@ function cacheUrls(urls, done){
 var downloadForOfflineHandler = null;
 function downloadForOffline(){
   if (!offlineSupported()){ refreshOfflineStatusMessage(); return; }
-  var urls = []; // the KJV text itself is already stored when the app installs
+  var urls = []; // the KJV text and the drawn pictures are already stored when the app installs
   Object.keys(ART).forEach(function(key){
     urls.push(commonsUrl(ART[key].f, 700));
     urls.push(commonsUrl(ART[key].f, 480));
@@ -1298,9 +1816,14 @@ function seekFractionForVerse(book, chapter, verse){
 var persistentAudio = null; // survives across chapter re-renders when the underlying file hasn't changed
 var narrationDownloadHandler = null; // pending service-worker message listener, so re-clicking doesn't stack listeners
 
+function usingRecording(book, chapter){
+  return state.narrSource !== "tts" && !!findLibrivoxFile(book, chapter) && !recordingFailed[book + " " + chapter];
+}
+var recordingFailed = {}; // chapters whose recording couldn't load this session (e.g. offline and not saved)
+
 function buildNarrationPlayer(book, chapter){
+  if (!usingRecording(book, chapter)) return buildTtsPlayer(book, chapter);
   var match = findLibrivoxFile(book, chapter);
-  if (!match) return null;
 
   var wrap = el("div","narration-player");
   wrap.appendChild(el("div","narration-label",
@@ -1311,6 +1834,7 @@ function buildNarrationPlayer(book, chapter){
   if (!sameFileAlreadyPlaying){
     audio.id = "librivoxAudio";
     audio.controls = true;
+    audio.addEventListener("play", function(){ ttsStop(); });
     audio.preload = "metadata"; // was "none" -- duration never resolved until Play was pressed, so seeking silently never fired
     audio.src = LIBRIVOX_BASE + match.file;
     audio._file = match.file;
@@ -1319,6 +1843,26 @@ function buildNarrationPlayer(book, chapter){
   audio.volume = state.narrVol;
   audio.playbackRate = state.narrRate;
   wrap.appendChild(audio);
+
+  /* If the recording can't load (offline and not saved, archive.org down),
+     offer the device's own voice right here instead of a silent player. */
+  audio.onerror = function(){
+    if (wrap.querySelector(".narration-fallback")) return;
+    var fb = el("div","narration-fallback");
+    fb.appendChild(el("div","narration-note","The recording couldn\u2019t load (are you offline?)."));
+    if ("speechSynthesis" in window){
+      var useTts = el("button","tts-btn primary","\u25B6 Use device voice");
+      useTts.addEventListener("click", function(){
+        recordingFailed[book + " " + chapter] = true;
+        if (persistentAudio === audio) persistentAudio = null;
+        var player = buildTtsPlayer(book, chapter);
+        wrap.parentNode.replaceChild(player, wrap);
+        ttsPlay(book, chapter, 0);
+      });
+      fb.appendChild(useTts);
+    }
+    wrap.appendChild(fb);
+  };
 
   function seekTo(fraction){
     function apply(){
@@ -1366,32 +1910,222 @@ function seekNarrationToVerse(book, chapter, verse){
   else audio.addEventListener("loadedmetadata", apply, {once:true});
 }
 
+/* Tapping a verse number starts narration there, whichever narrator is in use. */
+function narrateFromVerse(book, chapter, verse){
+  if (usingRecording(book, chapter)) seekNarrationToVerse(book, chapter, verse);
+  else ttsPlay(book, chapter, verse);
+}
+
 /* keepPlaying: set by auto-read on page turn, so narration already playing
    carries on instead of being toggled to paused. */
 function readChapterAloud(keepPlaying){
-  var match = findLibrivoxFile(state.book, state.chapter);
-  var audioEl = (match && state.narrSource!=="tts") ? $("librivoxAudio") : null;
+  var audioEl = usingRecording(state.book, state.chapter) ? $("librivoxAudio") : null;
   if (audioEl){
     if (!audioEl.paused){ if (!keepPlaying) audioEl.pause(); }
     else { audioEl.play().catch(function(){}); }
     return;
   }
-  if (!("speechSynthesis" in window)){
-    alert("This browser doesn't support built-in text-to-speech. Try Chrome, Edge, or Safari.");
-    return;
-  }
-  if (speechSynthesis.speaking){ speechSynthesis.cancel(); return; }
-  var verses = BIBLE[state.book][state.chapter];
+  var player = $("ttsPlayer");
+  if (player && !keepPlaying) player.scrollIntoView({behavior:"smooth", block:"nearest"});
+  if (!("speechSynthesis" in window)) return; // the player itself explains why
+  if (tts.playing){ if (!keepPlaying) ttsPause(); return; }
+  var resume = (tts.book === state.book && tts.chapter === state.chapter) ? tts.verse : 1;
+  ttsPlay(state.book, state.chapter, resume);
+}
+
+/* ============================================================
+   Device voice (speechSynthesis), read one verse at a time.
+   Speaking verse by verse rather than the whole chapter at once:
+   - Chrome stops long utterances after ~15 seconds, and Android
+     refuses very long text outright;
+   - pause()/resume() are unreliable on Android and iOS, so Pause
+     cancels and Play restarts at the current verse instead;
+   - the verse being read can be highlighted on every browser.
+   ============================================================ */
+var tts = { book:null, chapter:null, verse:1, chunks:[], idx:0, playing:false, token:0, utter:null };
+
+function ttsChunks(book, chapter){
+  var verses = BIBLE[book][chapter];
   var nums = Object.keys(verses).sort(function(a,b){return a-b;});
-  var text = nums.map(function(n){ return verses[n]; }).join(" ");
-  var utter = new SpeechSynthesisUtterance(text);
-  utter.rate = state.narrRate;
-  utter.volume = state.narrVol;
+  var out = [];
+  nums.forEach(function(n){
+    var text = verses[n], v = Number(n);
+    /* split long verses at punctuation so no single utterance runs long */
+    while (text.length > 220){
+      var cut = -1, m, re = /[;:,.?!]\s/g;
+      while ((m = re.exec(text)) && m.index < 220) cut = m.index + 1;
+      if (cut < 40) cut = text.lastIndexOf(" ", 220);
+      if (cut < 1) break;
+      out.push({v:v, text:text.slice(0, cut)});
+      text = text.slice(cut).replace(/^\s+/, "");
+    }
+    if (text) out.push({v:v, text:text});
+  });
+  return out;
+}
+
+function ttsPickVoice(){
+  if (!voicesCache.length && "speechSynthesis" in window) voicesCache = speechSynthesis.getVoices();
   if (state.narrVoice){
-    var v = voicesCache.filter(function(v){ return v.name===state.narrVoice; })[0];
-    if (v) utter.voice = v;
+    var chosen = voicesCache.filter(function(v){ return v.name===state.narrVoice; })[0];
+    if (chosen) return chosen;
   }
-  speechSynthesis.speak(utter);
+  /* Phones set to another language would otherwise read English in that
+     language's voice; prefer an English one. */
+  var en = voicesCache.filter(function(v){ return /^en[-_]/i.test(v.lang) && v.localService; });
+  if (!en.length) en = voicesCache.filter(function(v){ return /^en[-_]/i.test(v.lang); });
+  return en[0] || null;
+}
+
+function ttsHighlight(verse){
+  var prev = document.querySelectorAll(".verse-reading");
+  for (var i=0; i<prev.length; i++) prev[i].classList.remove("verse-reading");
+  if (!verse) return;
+  var vEl = $("v-" + verse);
+  if (!vEl) return;
+  vEl.classList.add("verse-reading");
+  var r = vEl.getBoundingClientRect();
+  if (r.top < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight)){
+    vEl.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+}
+
+function ttsSpeakCurrent(){
+  var token = ++tts.token;
+  var chunk = tts.chunks[tts.idx];
+  if (!chunk){ ttsFinished(); return; }
+  tts.verse = chunk.v;
+  ttsHighlight(chunk.v);
+  ttsUpdateUI();
+  var u = new SpeechSynthesisUtterance(chunk.text);
+  u.rate = state.narrRate;
+  u.volume = state.narrVol;
+  var voice = ttsPickVoice();
+  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
+  u.onend = function(){
+    if (token !== tts.token || !tts.playing) return;
+    tts.idx++;
+    ttsSpeakCurrent();
+  };
+  u.onerror = function(e){
+    if (token !== tts.token) return;
+    if (e && (e.error === "interrupted" || e.error === "canceled")) return;
+    tts.playing = false;
+    ttsUpdateUI(e && e.error === "not-allowed" ? "Tap Play to start reading." : "Your device voice stopped. Tap Play to try again.");
+  };
+  tts.utter = u; // keep a reference: Chrome drops onend for garbage-collected utterances
+  speechSynthesis.speak(u);
+  /* Safari and Chrome can be left paused by another tab or app */
+  if (speechSynthesis.paused) speechSynthesis.resume();
+}
+
+function ttsPlay(book, chapter, verse){
+  if (!("speechSynthesis" in window)) return;
+  if (tts.book !== book || tts.chapter !== chapter){
+    tts.book = book; tts.chapter = chapter;
+    tts.chunks = ttsChunks(book, chapter);
+  }
+  tts.idx = 0;
+  for (var i=0; i<tts.chunks.length; i++){ if (tts.chunks[i].v >= (verse||1)){ tts.idx = i; break; } }
+  stopOtherNarration();
+  speechSynthesis.cancel();
+  tts.playing = true;
+  ttsSpeakCurrent();
+}
+
+function ttsPause(){
+  tts.playing = false;
+  tts.token++;
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  ttsUpdateUI();
+}
+
+function ttsStop(){
+  var wasActive = tts.playing || tts.book !== null;
+  tts.playing = false;
+  tts.token++;
+  tts.book = tts.chapter = null; tts.chunks = []; tts.idx = 0; tts.verse = 1;
+  if ("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+  if (wasActive){ ttsHighlight(null); ttsUpdateUI(); }
+}
+
+function ttsSkip(delta){
+  if (!tts.chunks.length){ ttsPlay(state.book, state.chapter, 1); return; }
+  var target = Math.max(1, tts.verse + delta);
+  var last = tts.chunks[tts.chunks.length-1].v;
+  if (target > last) target = last;
+  if (tts.playing) ttsPlay(tts.book, tts.chapter, target);
+  else {
+    for (var i=0; i<tts.chunks.length; i++){ if (tts.chunks[i].v >= target){ tts.idx = i; break; } }
+    tts.verse = target; ttsHighlight(target); ttsUpdateUI();
+  }
+}
+
+function ttsFinished(){
+  tts.playing = false;
+  ttsHighlight(null);
+  var finished = tts.book;
+  tts.book = tts.chapter = null; tts.chunks = []; tts.idx = 0; tts.verse = 1;
+  ttsUpdateUI("Finished this chapter.");
+  /* With auto-read on, carry on into the next chapter like an audiobook */
+  if (finished && state.autoRead) navigateChapter(1);
+}
+
+/* Pause the recording when the device voice starts, so the two never overlap. */
+function stopOtherNarration(){
+  var a = $("librivoxAudio");
+  if (a && !a.paused) a.pause();
+}
+
+function ttsUpdateUI(message){
+  var player = $("ttsPlayer");
+  if (!player) return;
+  var playBtn = player.querySelector(".tts-play");
+  var status = player.querySelector(".tts-status");
+  var total = Object.keys(BIBLE[state.book][state.chapter]).length;
+  var here = (tts.book === state.book && tts.chapter === state.chapter);
+  playBtn.textContent = tts.playing ? "❚❚ Pause" : (here && tts.verse > 1 ? "▶ Resume" : "▶ Play");
+  playBtn.setAttribute("aria-pressed", tts.playing ? "true" : "false");
+  player.querySelector(".tts-stop").disabled = !here;
+  status.textContent = message || (here ? (tts.playing ? "Reading verse " : "Paused at verse ") + tts.verse + " of " + total : "");
+}
+
+function buildTtsPlayer(book, chapter){
+  var wrap = el("div","narration-player");
+  wrap.id = "ttsPlayer";
+  if (!("speechSynthesis" in window)){
+    wrap.appendChild(el("div","narration-note",
+      "This browser can’t read aloud. Turn on “Real narration” in Settings, or try Safari, Chrome or Edge."));
+    return wrap;
+  }
+  wrap.appendChild(el("div","narration-label",
+    "Read aloud by your device’s voice — tap a verse number to start there"));
+  var controls = el("div","tts-controls");
+  function btn(cls, label, aria, fn){
+    var b = el("button","tts-btn " + cls, label);
+    b.type = "button";
+    b.setAttribute("aria-label", aria);
+    b.addEventListener("click", fn);
+    controls.appendChild(b);
+    return b;
+  }
+  btn("tts-back", "⏮", "Previous verse", function(){ ttsSkip(-1); });
+  btn("tts-play primary", "▶ Play", "Play or pause", function(){
+    if (tts.playing) ttsPause();
+    else {
+      var here = (tts.book === book && tts.chapter === chapter);
+      ttsPlay(book, chapter, here ? tts.verse : 1);
+    }
+  });
+  btn("tts-next", "⏭", "Next verse", function(){ ttsSkip(1); });
+  btn("tts-stop", "■ Stop", "Stop reading", function(){ ttsStop(); });
+  wrap.appendChild(controls);
+  var status = el("div","tts-status");
+  status.setAttribute("aria-live","polite");
+  wrap.appendChild(status);
+  /* render before the player is in the page, then refresh once it is */
+  setTimeout(ttsUpdateUI, 0);
+  return wrap;
 }
 
 /* ============================================================
@@ -1487,6 +2221,7 @@ function applyTheme(){
   document.body.setAttribute("data-theme", state.theme);
   $("themeParchmentBtn").classList.toggle("active", state.theme==="parchment");
   $("themeStoneBtn").classList.toggle("active", state.theme==="stone");
+  if ($("qsDark")) syncQuickSettings();
 }
 var FONT_STACKS = {
   blackletter: "'UnifrakturMaguntia', serif",
@@ -1501,7 +2236,43 @@ function applyFontSize(){
   var s = $("pageBody").querySelector(".scripture");
   if (s) s.style.setProperty("--fs", state.fontSize+"px");
 }
-function initSettingsUI(){
+
+/* Shared setters so the quick-settings strip and the full Settings panel stay in step. */
+var FONT_MIN = 16, FONT_MAX = 34;
+function syncQuickSettings(){
+  $("qsSizeOut").textContent = state.fontSize;
+  $("qsSmaller").disabled = state.fontSize <= FONT_MIN;
+  $("qsBigger").disabled = state.fontSize >= FONT_MAX;
+  $("qsDark").setAttribute("aria-checked", state.theme==="stone" ? "true" : "false");
+  $("qsAutoRead").setAttribute("aria-checked", state.autoRead ? "true" : "false");
+  $("qsPictures").setAttribute("aria-checked", state.showArt ? "true" : "false");
+}
+function setFontSize(px){
+  state.fontSize = Math.max(FONT_MIN, Math.min(FONT_MAX, px)); saveState();
+  $("fontSizeRange").value = state.fontSize;
+  $("fontSizeLbl").textContent = state.fontSize+"px";
+  applyFontSize(); syncQuickSettings();
+}
+function setTheme(theme){
+  state.theme = theme; saveState(); applyTheme();
+}
+function setAutoRead(on){
+  state.autoRead = on; saveState();
+  $("autoReadCheck").checked = on; syncQuickSettings();
+}
+function setShowArt(on){
+  state.showArt = on; saveState();
+  $("artToggleBtn").classList.toggle("active-toggle", on);
+  $("showArtCheck").checked = on; syncQuickSettings();
+  openChapter(state.book, state.chapter);
+}
+function setQuickSettingsOpen(open){
+  $("quickSettings").hidden = !open;
+  $("settingsBtn").setAttribute("aria-expanded", open ? "true" : "false");
+  $("settingsBtn").classList.toggle("active-toggle", open);
+}
+/* Puts every settings control in step with state (also after a sync). */
+function refreshSettingsUI(){
   $("musicVolRange").value = state.musicVol;
   $("musicVolLbl").textContent = Math.round(state.musicVol*100)+"%";
   $("musicOnCheck").checked = state.musicOn;
@@ -1529,6 +2300,11 @@ function initSettingsUI(){
   applyFontFamily();
   applyWakeLock();
   refreshOfflineStatusMessage();
+  $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
+  syncQuickSettings();
+}
+function initSettingsUI(){
+  refreshSettingsUI();
 
   $("musicVolRange").addEventListener("input", function(e){
     var v=parseFloat(e.target.value); setMusicVolume(v);
@@ -1561,18 +2337,15 @@ function initSettingsUI(){
   $("narrRateRange").addEventListener("change", function(){ saveState(); });
   $("narrSourceSelect").addEventListener("change", function(e){
     state.narrSource = e.target.value; saveState();
+    ttsStop();
+    var a = $("librivoxAudio"); if (a && !a.paused) a.pause();
+    openChapter(state.book, state.chapter);
   });
   $("voiceSelect").addEventListener("change", function(e){
     state.narrVoice = e.target.value; saveState();
   });
-  $("autoReadCheck").addEventListener("change", function(e){
-    state.autoRead = e.target.checked; saveState();
-  });
-  $("showArtCheck").addEventListener("change", function(e){
-    state.showArt = e.target.checked; saveState();
-    $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
-    openChapter(state.book, state.chapter);
-  });
+  $("autoReadCheck").addEventListener("change", function(e){ setAutoRead(e.target.checked); });
+  $("showArtCheck").addEventListener("change", function(e){ setShowArt(e.target.checked); });
   $("showVerseNumCheck").addEventListener("change", function(e){
     state.showVerseNum = e.target.checked; saveState();
     var s = $("pageBody").querySelector(".scripture");
@@ -1585,26 +2358,32 @@ function initSettingsUI(){
     state.wakeLock = e.target.checked; saveState();
     applyWakeLock();
   });
-  $("fontSizeRange").addEventListener("input", function(e){
-    state.fontSize = parseInt(e.target.value,10); saveState();
-    $("fontSizeLbl").textContent = state.fontSize+"px";
-    applyFontSize();
-  });
+  $("fontSizeRange").addEventListener("input", function(e){ setFontSize(parseInt(e.target.value,10)); });
   $("fontFamilySelect").addEventListener("change", function(e){
     state.fontFamily = e.target.value; saveState();
     applyFontFamily();
   });
-  $("themeParchmentBtn").addEventListener("click", function(){ state.theme="parchment"; saveState(); applyTheme(); });
-  $("themeStoneBtn").addEventListener("click", function(){ state.theme="stone"; saveState(); applyTheme(); });
+  $("themeParchmentBtn").addEventListener("click", function(){ setTheme("parchment"); });
+  $("themeStoneBtn").addEventListener("click", function(){ setTheme("stone"); });
   $("downloadOfflineBtn").addEventListener("click", downloadForOffline);
   $("clearOfflineBtn").addEventListener("click", clearOfflineData);
 
-  $("settingsBtn").addEventListener("click", function(){ $("overlay").classList.add("open"); refreshOfflineStatusMessage(); });
+  /* The Settings button opens the quick-settings strip in the page flow (it pushes the
+     text down rather than covering it); the full list is one tap further, under "More settings". */
+  $("settingsBtn").addEventListener("click", function(){ setQuickSettingsOpen($("quickSettings").hidden); });
+  $("qsDone").addEventListener("click", function(){ setQuickSettingsOpen(false); $("settingsBtn").focus(); });
+  $("qsMore").addEventListener("click", function(){ $("overlay").classList.add("open"); refreshOfflineStatusMessage(); });
+  $("qsSmaller").addEventListener("click", function(){ setFontSize(state.fontSize-2); });
+  $("qsBigger").addEventListener("click", function(){ setFontSize(state.fontSize+2); });
+  $("qsDark").addEventListener("click", function(){ setTheme(state.theme==="stone" ? "parchment" : "stone"); });
+  $("qsAutoRead").addEventListener("click", function(){ setAutoRead(!state.autoRead); });
+  $("qsPictures").addEventListener("click", function(){ setShowArt(!state.showArt); });
+  syncQuickSettings();
   $("closeSettings").addEventListener("click", function(){ $("overlay").classList.remove("open"); });
   $("overlay").addEventListener("click", function(e){ if (e.target.id==="overlay") $("overlay").classList.remove("open"); });
 
   $("bookmarkBtn").addEventListener("click", toggleBookmark);
-  $("bookmarksListBtn").addEventListener("click", function(){ renderBookmarksList(); $("overlay2").classList.add("open"); });
+  $("bookmarksListBtn").addEventListener("click", function(){ renderBookmarksList(); renderNotesList(); $("overlay2").classList.add("open"); });
   $("closeBookmarks").addEventListener("click", function(){ $("overlay2").classList.remove("open"); });
   $("overlay2").addEventListener("click", function(e){ if (e.target.id==="overlay2") $("overlay2").classList.remove("open"); });
 
@@ -1617,12 +2396,7 @@ function initSettingsUI(){
     searchDebounceTimer = setTimeout(function(){ renderSearchResults(val); }, 250);
   });
 
-  $("artToggleBtn").addEventListener("click", function(){
-    state.showArt = !state.showArt; saveState();
-    $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
-    $("showArtCheck").checked = state.showArt;
-    openChapter(state.book, state.chapter);
-  });
+  $("artToggleBtn").addEventListener("click", function(){ setShowArt(!state.showArt); });
   $("artToggleBtn").classList.toggle("active-toggle", state.showArt);
 
   $("readAloudBtn").addEventListener("click", function(){ readChapterAloud(false); });
@@ -1638,6 +2412,7 @@ function initSettingsUI(){
       else if ($("overlay").classList.contains("open")) $("overlay").classList.remove("open");
       else if ($("overlay2").classList.contains("open")) $("overlay2").classList.remove("open");
       else if ($("overlay3").classList.contains("open")) closeSearchPanel();
+      else if ($("overlay4").classList.contains("open")) closeAccountPanel();
       return;
     }
     if (e.key==="ArrowRight" || e.key==="ArrowLeft"){
@@ -1648,6 +2423,7 @@ function initSettingsUI(){
       if ($("overlay").classList.contains("open")) return;
       if ($("overlay2").classList.contains("open")) return;
       if ($("overlay3").classList.contains("open")) return;
+      if ($("overlay4").classList.contains("open")) return;
       if (navigateChapter(e.key==="ArrowRight" ? 1 : -1)) e.preventDefault();
     }
   });
@@ -1680,11 +2456,647 @@ function initSettingsUI(){
 }
 
 /* ============================================================
+   Notes and reading progress
+   ============================================================ */
+function chapterKey(book, chapter){ return book + " " + chapter; }
+function markChapterRead(book, chapter){
+  var k = chapterKey(book, chapter);
+  if (!state.readChapters[k]) state.readChapters[k] = Date.now();
+}
+function countChapters(){
+  var n = 0;
+  BOOK_ORDER.forEach(function(b){ n += Object.keys(BIBLE[b]).length; });
+  return n;
+}
+function noteText(book, chapter){
+  var n = state.notes[chapterKey(book, chapter)];
+  return n && typeof n.t === "string" ? n.t : "";
+}
+var noteSaveTimer = null;
+function buildChapterNote(book, chapter){
+  var box = document.createElement("details");
+  box.className = "chapter-note";
+  var text = noteText(book, chapter);
+  box.open = !!text;
+  var sum = el("summary", "", "✎  My notes on this chapter");
+  var area = document.createElement("textarea");
+  area.id = "chapterNoteText";
+  area.setAttribute("aria-label", "My notes on " + book + " " + chapter);
+  area.placeholder = "Write a thought, a prayer or a question…";
+  area.value = text;
+  var saved = el("div", "note-saved");
+  saved.setAttribute("aria-live", "polite");
+  area.addEventListener("input", function(){
+    saved.textContent = "";
+    clearTimeout(noteSaveTimer);
+    noteSaveTimer = setTimeout(function(){
+      /* An emptied note stays as a dated blank, so the deletion syncs too. */
+      state.notes[chapterKey(book, chapter)] = {t: area.value.trim() ? area.value : "", ts: Date.now()};
+      saveState();
+      saved.textContent = "Saved.";
+    }, 600);
+  });
+  box.appendChild(sum);
+  box.appendChild(area);
+  box.appendChild(saved);
+  return box;
+}
+function renderNotesList(){
+  var list = $("notesList");
+  list.innerHTML = "";
+  var keys = Object.keys(state.notes).filter(function(k){
+    var n = state.notes[k], i = k.lastIndexOf(" ");
+    return n && n.t && BIBLE && BIBLE[k.slice(0, i)] && BIBLE[k.slice(0, i)][k.slice(i + 1)];
+  }).sort(function(a, b){ return state.notes[b].ts - state.notes[a].ts; });
+  if (!keys.length) return;
+  list.appendChild(el("h3", "", "My Notes"));
+  keys.forEach(function(k){
+    var i = k.lastIndexOf(" "), book = k.slice(0, i), chapter = Number(k.slice(i + 1));
+    var row = el("div", "bookmark-row");
+    var link = el("button", "bookmark-link");
+    link.appendChild(document.createTextNode(book + " " + toRoman(chapter)));
+    var t = state.notes[k].t;
+    link.appendChild(el("span", "note-preview", t.length > 80 ? t.slice(0, 80) + "…" : t));
+    link.addEventListener("click", function(){
+      $("overlay2").classList.remove("open");
+      openChapter(book, chapter);
+    });
+    row.appendChild(link);
+    list.appendChild(row);
+  });
+}
+
+/* ============================================================
+   Account & sync (optional)
+   Sign-in uses Supabase Auth; each account keeps one row in the
+   reader_data table holding bookmarks, notes, reading place and
+   settings. Everything works without an account; signing in only
+   adds a copy that the same person's other devices merge with.
+   Keys live in auth-config.json (public "anon" key only).
+   ============================================================ */
+var AUTH_KEY = "kjv1611-auth", SYNC_KEY = "kjv1611-sync";
+/* State that isn't a plain setting (or is particular to one device). */
+var SYNC_SKIP = {book:1, chapter:1, bookmarks:1, notes:1, readChapters:1, narrVoice:1};
+var authConfig = null, session = null;
+var syncMeta = {settingsTs:0, progressTs:0, tombs:{}, lastSync:0};
+var lastFingerprint = null, syncTimer = null, syncInFlight = null, syncQueued = false;
+var refreshInFlight = null, firstSyncPending = true;
+
+function loadJson(key){
+  try{ var raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function storeJson(key, value){
+  try{
+    if (value == null) localStorage.removeItem(key);
+    else localStorage.setItem(key, JSON.stringify(value));
+  }catch(e){}
+}
+function saveSyncMeta(){ storeJson(SYNC_KEY, syncMeta); }
+function saveSession(){ storeJson(AUTH_KEY, session); }
+
+function settingsSnapshot(){
+  var o = {};
+  for (var k in state) if (!SYNC_SKIP[k]) o[k] = state[k];
+  return o;
+}
+function bookmarkKey(b){ return chapterKey(b.book, b.chapter); }
+function takeFingerprint(){
+  return {s: JSON.stringify(settingsSnapshot()), p: chapterKey(state.book, state.chapter),
+          b: state.bookmarks.map(bookmarkKey), n: JSON.stringify(state.notes)};
+}
+/* Called by saveState: dates whatever changed, so the newest edit wins a sync. */
+function noteLocalChange(){
+  var fp = takeFingerprint(), old = lastFingerprint, now = Date.now(), changed = false;
+  lastFingerprint = fp;
+  if (!old) return;
+  if (fp.s !== old.s){ syncMeta.settingsTs = now; changed = true; }
+  if (fp.p !== old.p){ syncMeta.progressTs = now; changed = true; }
+  if (fp.n !== old.n) changed = true;
+  old.b.forEach(function(k){ if (fp.b.indexOf(k) < 0){ syncMeta.tombs[k] = now; changed = true; } });
+  fp.b.forEach(function(k){ if (old.b.indexOf(k) < 0){ delete syncMeta.tombs[k]; changed = true; } });
+  if (!changed) return;
+  saveSyncMeta();
+  scheduleSync(2500);
+}
+
+/* ---- Merging: per item, the newest change wins ---- */
+function validChapter(book, chapter){
+  return !!(BIBLE && BIBLE[book] && BIBLE[book][chapter]);
+}
+function splitKey(k){
+  var i = String(k).lastIndexOf(" ");
+  return {book: String(k).slice(0, i), chapter: Number(String(k).slice(i + 1))};
+}
+function num(v){ return typeof v === "number" && isFinite(v) ? v : 0; }
+function buildDoc(){
+  var bookmarks = {};
+  Object.keys(syncMeta.tombs).forEach(function(k){ bookmarks[k] = {ts: syncMeta.tombs[k], del: true}; });
+  state.bookmarks.forEach(function(b){ bookmarks[bookmarkKey(b)] = {ts: num(b.ts)}; });
+  return {
+    v: 1,
+    settings: {ts: syncMeta.settingsTs, data: settingsSnapshot()},
+    progress: {ts: syncMeta.progressTs, book: state.book, chapter: state.chapter},
+    bookmarks: bookmarks,
+    notes: state.notes,
+    read: state.readChapters
+  };
+}
+function mergeDocs(local, remote){
+  if (!remote || typeof remote !== "object") return local;
+  var out = {v: 1, settings: local.settings, progress: local.progress, bookmarks: {}, notes: {}, read: {}};
+  if (remote.settings && num(remote.settings.ts) > num(local.settings.ts) && remote.settings.data &&
+      typeof remote.settings.data === "object") out.settings = remote.settings;
+  var rp = remote.progress;
+  if (rp && num(rp.ts) > num(local.progress.ts) && validChapter(rp.book, rp.chapter)) out.progress = rp;
+  function newest(field, ok){
+    [local[field], remote[field]].forEach(function(map){
+      if (!map || typeof map !== "object") return;
+      Object.keys(map).forEach(function(k){
+        var item = map[k], p = splitKey(k);
+        if (!validChapter(p.book, p.chapter) || !ok(item)) return;
+        var cur = out[field][k];
+        if (!cur || num(item.ts) > num(cur.ts)) out[field][k] = item;
+      });
+    });
+  }
+  newest("bookmarks", function(b){ return b && typeof b === "object"; });
+  newest("notes", function(n){ return n && typeof n === "object" && typeof n.t === "string"; });
+  /* Chapters read: keep the earliest date, and every chapter either side has read. */
+  [local.read, remote.read].forEach(function(map){
+    if (!map || typeof map !== "object") return;
+    Object.keys(map).forEach(function(k){
+      var p = splitKey(k), t = num(map[k]);
+      if (!t || !validChapter(p.book, p.chapter)) return;
+      if (!out.read[k] || t < out.read[k]) out.read[k] = t;
+    });
+  });
+  return out;
+}
+/* Puts a merged copy into effect on this device. */
+function applyDoc(doc, mayJump){
+  var before = {showArt: state.showArt, settings: JSON.stringify(settingsSnapshot()),
+                note: noteText(state.book, state.chapter), mark: isBookmarked(state.book, state.chapter)};
+  if (num(doc.settings.ts) > syncMeta.settingsTs){
+    var data = doc.settings.data;
+    for (var k in data){
+      if (SYNC_SKIP[k] || !(k in state)) continue;
+      if (typeof data[k] !== typeof state[k] || (typeof data[k] === "number" && !isFinite(data[k]))) continue;
+      state[k] = data[k];
+    }
+    syncMeta.settingsTs = num(doc.settings.ts);
+  }
+  var live = [], tombs = {};
+  Object.keys(doc.bookmarks).forEach(function(k){
+    var b = doc.bookmarks[k], p = splitKey(k);
+    if (b.del) tombs[k] = num(b.ts);
+    else live.push({book: p.book, chapter: p.chapter, ts: num(b.ts)});
+  });
+  live.sort(function(a, b){ return b.ts - a.ts; });
+  state.bookmarks = live;
+  syncMeta.tombs = tombs;
+  state.notes = doc.notes;
+  state.readChapters = doc.read;
+  var jump = mayJump && num(doc.progress.ts) > syncMeta.progressTs &&
+    chapterKey(doc.progress.book, doc.progress.chapter) !== chapterKey(state.book, state.chapter);
+  if (jump){
+    syncMeta.progressTs = num(doc.progress.ts);
+    state.book = doc.progress.book; state.chapter = Number(doc.progress.chapter);
+  }
+  lastFingerprint = takeFingerprint(); /* merged data is not a new local edit */
+  saveState();
+  saveSyncMeta();
+
+  var settingsChanged = JSON.stringify(settingsSnapshot()) !== before.settings;
+  if (settingsChanged) refreshSettingsUI();
+  var area = $("chapterNoteText");
+  var noteChanged = noteText(state.book, state.chapter) !== before.note;
+  if (jump || state.showArt !== before.showArt || (noteChanged && area && document.activeElement !== area)){
+    openChapter(state.book, state.chapter);
+  } else {
+    if (settingsChanged){
+      applyFontSize();
+      var s = $("pageBody").querySelector(".scripture");
+      if (s) s.classList.toggle("hide-vnum", !state.showVerseNum);
+    }
+    if (isBookmarked(state.book, state.chapter) !== before.mark) updateBookmarkBtn();
+  }
+  if ($("overlay2").classList.contains("open")){ renderBookmarksList(); renderNotesList(); }
+}
+
+/* ---- Talking to the sign-in service ---- */
+function friendlyError(msg, status){
+  var m = String(msg || "");
+  if (/invalid login credentials|invalid_grant/i.test(m)) return "That email and password don't match. Check them and try again.";
+  if (/email not confirmed/i.test(m)) return "Please confirm your email first: open the link we emailed you, then sign in here.";
+  if (/already registered|already exists/i.test(m)) return "There is already an account with that email. Try Sign In, or Forgot your password.";
+  if (/password should be|weak password|at least/i.test(m)) return "Please choose a longer password (at least 6 characters).";
+  if (/rate limit|too many/i.test(m) || status === 429) return "Too many tries just now. Please wait a minute and try again.";
+  if (/failed to fetch|networkerror|load failed|network/i.test(m)) return "Couldn't reach the sign-in service. Check your internet connection.";
+  return m || "Something went wrong (error " + status + ").";
+}
+function sbRequest(path, opts, authed){
+  opts = opts || {};
+  function go(){
+    var headers = {apikey: authConfig.key};
+    if (opts.body) headers["Content-Type"] = "application/json";
+    if (opts.prefer) headers.Prefer = opts.prefer;
+    if (authed && session) headers.Authorization = "Bearer " + session.access_token;
+    return fetch(authConfig.url + path, {method: opts.method || "GET", headers: headers,
+      body: opts.body ? JSON.stringify(opts.body) : undefined, cache: "no-store", credentials: "omit"});
+  }
+  var ready = authed ? freshToken() : Promise.resolve();
+  return ready.then(go).then(function(resp){
+    if (resp.status === 401 && authed && session) return refreshSession().then(go);
+    return resp;
+  }).then(function(resp){
+    return resp.text().then(function(text){
+      var data = null;
+      try{ data = text ? JSON.parse(text) : null; }catch(e){}
+      if (!resp.ok){
+        var raw = data && (data.msg || data.error_description || data.message || data.error);
+        var err = new Error(friendlyError(raw, resp.status));
+        err.status = resp.status;
+        throw err;
+      }
+      return data;
+    });
+  }, function(err){
+    if (err && err.status) throw err;
+    throw new Error(friendlyError(err && err.message));
+  });
+}
+function adoptSession(data){
+  if (!data || !data.access_token) return false;
+  var expiresAt = num(Number(data.expires_at)) || (Math.floor(Date.now() / 1000) + (num(Number(data.expires_in)) || 3600));
+  session = {access_token: data.access_token, refresh_token: data.refresh_token, expires_at: expiresAt,
+             user: {id: data.user && data.user.id, email: data.user && data.user.email}};
+  saveSession();
+  return true;
+}
+function refreshSession(){
+  if (refreshInFlight) return refreshInFlight;
+  if (!session || !session.refresh_token) return Promise.reject(new Error("Please sign in again."));
+  refreshInFlight = fetch(authConfig.url + "/auth/v1/token?grant_type=refresh_token", {
+    method: "POST", headers: {apikey: authConfig.key, "Content-Type": "application/json"},
+    body: JSON.stringify({refresh_token: session.refresh_token}), cache: "no-store", credentials: "omit"
+  }).then(function(resp){
+    return resp.json().catch(function(){ return null; }).then(function(data){
+      if (resp.ok && adoptSession(data)) return;
+      if (resp.status === 400 || resp.status === 401 || resp.status === 403){
+        /* The sign-in was ended elsewhere (password change, account deleted). */
+        endSession();
+        showAccountMessage("You were signed out. Please sign in again to keep syncing.", true);
+      }
+      throw new Error("Please sign in again.");
+    });
+  });
+  refreshInFlight.then(clearRefresh, clearRefresh);
+  function clearRefresh(){ refreshInFlight = null; }
+  return refreshInFlight;
+}
+function freshToken(){
+  if (session && session.expires_at - 60 < Date.now() / 1000) return refreshSession();
+  return Promise.resolve();
+}
+function endSession(){
+  session = null;
+  saveSession();
+  firstSyncPending = true;
+  clearTimeout(syncTimer);
+  renderAccount();
+}
+
+/* ---- Sync ---- */
+function scheduleSync(delay){
+  if (!session || !authConfig) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(function(){ syncNow(false); }, delay || 0);
+}
+function syncNow(userAsked){
+  if (!session || !session.user.id || !authConfig || !BIBLE) return Promise.resolve();
+  if (syncInFlight){ syncQueued = true; return syncInFlight; }
+  clearTimeout(syncTimer);
+  setSyncStatus("Syncing…");
+  var userId = session.user.id;
+  syncInFlight = sbRequest("/rest/v1/reader_data?select=data&user_id=eq." + encodeURIComponent(userId), {}, true)
+    .then(function(rows){
+      if (!session || session.user.id !== userId) return;
+      var merged = mergeDocs(buildDoc(), rows && rows[0] ? rows[0].data : null);
+      applyDoc(merged, firstSyncPending);
+      firstSyncPending = false;
+      return sbRequest("/rest/v1/reader_data?on_conflict=user_id", {
+        method: "POST", prefer: "resolution=merge-duplicates,return=minimal",
+        body: {user_id: userId, data: buildDoc(), updated_at: new Date().toISOString()}
+      }, true).then(function(){
+        syncMeta.lastSync = Date.now(); saveSyncMeta();
+        setSyncStatus();
+      });
+    })
+    .catch(function(err){
+      if (!session) return;
+      setSyncStatus(navigator.onLine === false
+        ? "You're offline. Changes are saved on this device and will sync when you're back online."
+        : "Not synced yet: " + err.message);
+      if (userAsked) showAccountMessage("Sync didn't finish: " + err.message, true);
+    })
+    .then(function(){
+      syncInFlight = null;
+      if (syncQueued){ syncQueued = false; scheduleSync(300); }
+    });
+  return syncInFlight;
+}
+function setSyncStatus(text){
+  var elx = $("syncStatus");
+  if (text){ elx.textContent = text; return; }
+  if (!syncMeta.lastSync){ elx.textContent = "Not synced yet."; return; }
+  var d = new Date(syncMeta.lastSync);
+  elx.textContent = "Bookmarks, notes and settings synced " +
+    (Date.now() - syncMeta.lastSync < 60000 ? "just now." : "at " + d.toLocaleString() + ".");
+}
+
+/* ---- Account panel ---- */
+function showAccountMessage(text, isError){
+  var m = $("accountMsg");
+  m.textContent = text || "";
+  m.classList.toggle("error", !!isError);
+}
+var accountMode = "signin"; /* or "newpassword" */
+function renderAccount(){
+  var on = !!authConfig;
+  $("accountOff").hidden = on;
+  $("signInForm").hidden = !on || !!session || accountMode === "newpassword";
+  $("newPasswordForm").hidden = !on || !session || accountMode !== "newpassword";
+  $("signedInBox").hidden = !on || !session || accountMode === "newpassword";
+  $("accountIntro").hidden = !!session;
+  $("accountBtn").classList.toggle("signed-in", !!session);
+  $("accountBtn").setAttribute("aria-label", session ? "Account (signed in)" : "Account and sync");
+  if (session){
+    $("accountEmail").textContent = session.user.email || "your account";
+    if (!syncInFlight) setSyncStatus();
+  }
+  if (BIBLE){
+    var read = Object.keys(state.readChapters).length;
+    $("readingProgress").textContent = "Reading progress: you have opened " + read.toLocaleString() + " of " +
+      countChapters().toLocaleString() + " chapters" + (read ? ", and were last in " + state.book + " " + state.chapter + "." : ".");
+  }
+  $("deleteConfirm").hidden = true;
+}
+function openAccountPanel(){
+  renderAccount();
+  $("overlay4").classList.add("open");
+}
+function closeAccountPanel(){
+  $("overlay4").classList.remove("open");
+  if (accountMode !== "newpassword") showAccountMessage("");
+}
+function setBusy(ids, busy){
+  ids.forEach(function(id){ $(id).disabled = busy; });
+}
+function redirectUrl(){ return location.origin + location.pathname; }
+function readCredentials(){
+  var email = $("authEmail").value.trim(), password = $("authPassword").value;
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showAccountMessage("Please type your email address.", true); return null; }
+  if (password.length < 6){ showAccountMessage("Please type a password of at least 6 characters.", true); return null; }
+  return {email: email, password: password};
+}
+function afterSignIn(welcome){
+  $("authPassword").value = "";
+  firstSyncPending = true;
+  syncMeta.lastSync = 0; saveSyncMeta();
+  renderAccount();
+  showAccountMessage(welcome);
+  syncNow(true).then(renderAccount);
+}
+function signIn(){
+  var c = readCredentials(); if (!c) return;
+  setBusy(["signInBtn", "signUpBtn"], true);
+  showAccountMessage("Signing in…");
+  sbRequest("/auth/v1/token?grant_type=password", {method: "POST", body: c})
+    .then(function(data){
+      if (!adoptSession(data)) throw new Error("The sign-in service gave an unexpected answer.");
+      afterSignIn("Welcome back. Your bookmarks, notes and settings are syncing.");
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["signInBtn", "signUpBtn"], false); });
+}
+function signUp(){
+  var c = readCredentials(); if (!c) return;
+  setBusy(["signInBtn", "signUpBtn"], true);
+  showAccountMessage("Creating your account…");
+  sbRequest("/auth/v1/signup?redirect_to=" + encodeURIComponent(redirectUrl()), {method: "POST", body: c})
+    .then(function(data){
+      if (adoptSession(data)){ afterSignIn("Your account is ready. What you have saved on this device is now kept in it."); return; }
+      showAccountMessage("Almost done: we sent a link to " + c.email + ". Open it to confirm your email, then come back here and tap Sign In." +
+        (isIOS() && isStandalone() ? " (On iPhone the link opens in Safari; after it confirms, return to this app to sign in.)" : ""));
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["signInBtn", "signUpBtn"], false); });
+}
+function forgotPassword(){
+  var email = $("authEmail").value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ showAccountMessage("Type your email address above first, then tap Forgot your password.", true); return; }
+  showAccountMessage("Sending…");
+  sbRequest("/auth/v1/recover?redirect_to=" + encodeURIComponent(redirectUrl()), {method: "POST", body: {email: email}})
+    .then(function(){ showAccountMessage("If there is an account for " + email + ", we sent it a link to choose a new password."); })
+    .catch(function(err){ showAccountMessage(err.message, true); });
+}
+function saveNewPassword(){
+  var pw = $("newPassword").value;
+  if (pw.length < 6){ showAccountMessage("Please choose a password of at least 6 characters.", true); return; }
+  setBusy(["savePasswordBtn"], true);
+  sbRequest("/auth/v1/user", {method: "PUT", body: {password: pw}}, true)
+    .then(function(){
+      $("newPassword").value = "";
+      accountMode = "signin";
+      renderAccount();
+      showAccountMessage("Your new password is saved, and you're signed in.");
+      syncNow(true);
+    })
+    .catch(function(err){ showAccountMessage(err.message, true); })
+    .then(function(){ setBusy(["savePasswordBtn"], false); });
+}
+function signOut(){
+  var wipe = $("signOutWipe").checked;
+  var done = function(){
+    endSession();
+    if (wipe){
+      state.bookmarks = []; state.notes = {}; state.readChapters = {};
+      syncMeta = {settingsTs: 0, progressTs: 0, tombs: {}, lastSync: 0};
+      lastFingerprint = null;
+      saveState(); saveSyncMeta();
+      lastFingerprint = takeFingerprint();
+      openChapter(state.book, state.chapter);
+    }
+    $("signOutWipe").checked = false;
+    showAccountMessage(wipe ? "Signed out, and your saved items were removed from this device." : "Signed out. Your bookmarks and notes stay on this device.");
+  };
+  /* Push the latest changes first, then end the session on the server too. */
+  var pending = syncInFlight || Promise.resolve();
+  pending.then(function(){
+    return sbRequest("/auth/v1/logout", {method: "POST"}, true).catch(function(){});
+  }).then(done, done);
+}
+function deleteAccount(){
+  setBusy(["deleteYesBtn", "deleteNoBtn"], true);
+  sbRequest("/rest/v1/rpc/delete_my_account", {method: "POST", body: {}}, true)
+    .then(function(){
+      endSession();
+      syncMeta.lastSync = 0; saveSyncMeta();
+      showAccountMessage("Your account has been deleted. Your bookmarks and notes are still on this device.");
+    })
+    .catch(function(err){ showAccountMessage("Your account wasn't deleted: " + err.message, true); })
+    .then(function(){ setBusy(["deleteYesBtn", "deleteNoBtn"], false); });
+}
+
+/* Links in sign-up and password emails come back with the session in the
+   address (#access_token=…). Take it, then clean the address. */
+function readAuthRedirect(){
+  var h = location.hash;
+  if (!/access_token=|error_description=/.test(h)) return null;
+  var params = {};
+  h.replace(/^#/, "").split("&").forEach(function(pair){
+    var i = pair.indexOf("=");
+    if (i > 0) params[decodeURIComponent(pair.slice(0, i))] = decodeURIComponent(pair.slice(i + 1).replace(/\+/g, " "));
+  });
+  try{ history.replaceState(null, "", location.pathname + location.search); }catch(e){}
+  return params;
+}
+function handleAuthRedirect(params){
+  if (params.error_description){
+    openAccountPanel();
+    showAccountMessage(/expired|invalid/i.test(params.error_description)
+      ? "That email link has expired or was already used. Please ask for a new one." : params.error_description, true);
+    return;
+  }
+  if (!adoptSession(params)) return;
+  /* The address carries no email, so ask the service who this is. */
+  sbRequest("/auth/v1/user", {}, true).then(function(user){
+    if (user && session){ session.user = {id: user.id, email: user.email}; saveSession(); }
+    if (params.type === "recovery"){
+      accountMode = "newpassword";
+      openAccountPanel();
+      showAccountMessage("Choose a new password for " + (user && user.email || "your account") + ".");
+    } else {
+      openAccountPanel();
+      afterSignIn("Your email is confirmed and you're signed in.");
+    }
+  }).catch(function(err){
+    endSession();
+    openAccountPanel();
+    showAccountMessage(err.message, true);
+  });
+}
+
+function loadAuthConfig(){
+  return fetch("auth-config.json", {cache: "no-store"}).then(function(r){ return r.ok ? r.json() : null; })
+    .catch(function(){ return null; })
+    .then(function(cfg){
+      var url = cfg && typeof cfg.supabaseUrl === "string" ? cfg.supabaseUrl.trim().replace(/\/+$/, "") : "";
+      var key = cfg && typeof cfg.supabaseAnonKey === "string" ? cfg.supabaseAnonKey.trim() : "";
+      /* The page's security policy only lets it talk to *.supabase.co. */
+      if (/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(url) && key) authConfig = {url: url, key: key};
+      else if (url || key) console.warn("auth-config.json: supabaseUrl must look like https://<project>.supabase.co and supabaseAnonKey must be set.");
+    });
+}
+
+function initAccount(){
+  var savedMeta = loadJson(SYNC_KEY);
+  if (savedMeta && typeof savedMeta === "object"){
+    syncMeta.settingsTs = num(savedMeta.settingsTs);
+    syncMeta.progressTs = num(savedMeta.progressTs);
+    syncMeta.lastSync = num(savedMeta.lastSync);
+    if (savedMeta.tombs && typeof savedMeta.tombs === "object") syncMeta.tombs = savedMeta.tombs;
+  }
+  if (!state.notes || typeof state.notes !== "object" || Array.isArray(state.notes)) state.notes = {};
+  if (!state.readChapters || typeof state.readChapters !== "object" || Array.isArray(state.readChapters)) state.readChapters = {};
+  lastFingerprint = takeFingerprint();
+  var s = loadJson(AUTH_KEY);
+  if (s && s.access_token && s.refresh_token && s.user && s.user.id) session = s;
+
+  var redirect = readAuthRedirect();
+  loadAuthConfig().then(function(){
+    if (!authConfig) session = null;
+    renderAccount();
+    if (redirect && authConfig) handleAuthRedirect(redirect);
+    else if (session && BIBLE && firstSyncPending) syncNow(false);
+  });
+
+  $("accountBtn").addEventListener("click", openAccountPanel);
+  $("closeAccount").addEventListener("click", closeAccountPanel);
+  $("overlay4").addEventListener("click", function(e){ if (e.target.id === "overlay4") closeAccountPanel(); });
+  $("signInForm").addEventListener("submit", function(e){ e.preventDefault(); signIn(); });
+  $("signUpBtn").addEventListener("click", signUp);
+  $("forgotBtn").addEventListener("click", forgotPassword);
+  $("showPassword").addEventListener("change", function(e){ $("authPassword").type = e.target.checked ? "text" : "password"; });
+  $("newPasswordForm").addEventListener("submit", function(e){ e.preventDefault(); saveNewPassword(); });
+  $("syncNowBtn").addEventListener("click", function(){ showAccountMessage(""); syncNow(true).then(renderAccount); });
+  $("signOutBtn").addEventListener("click", signOut);
+  $("deleteAccountBtn").addEventListener("click", function(){ $("deleteConfirm").hidden = false; });
+  $("deleteNoBtn").addEventListener("click", function(){ $("deleteConfirm").hidden = true; });
+  $("deleteYesBtn").addEventListener("click", deleteAccount);
+
+  /* Catch up when the app comes back to the front or the connection returns. */
+  document.addEventListener("visibilitychange", function(){
+    if (document.visibilityState === "visible" && session && Date.now() - syncMeta.lastSync > 30000) scheduleSync(0);
+    if (document.visibilityState === "hidden" && session && syncTimer) syncNow(false);
+  });
+  window.addEventListener("online", function(){ if (session) scheduleSync(0); });
+}
+
+/* ============================================================
+   Install as an app (home screen)
+   ============================================================ */
+/* True inside the App Store build (Capacitor wraps this page in a native app). */
+function isNativeApp(){
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
+function isIOS(){
+  return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function isStandalone(){
+  return navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+}
+var INSTALL_TIP_KEY = "kjv1611-install-tip";
+function initInstallTip(){
+  var installEvent = null;
+  function dismissed(){ try{ return localStorage.getItem(INSTALL_TIP_KEY) === "done"; }catch(e){ return false; } }
+  function hide(){
+    $("installTip").hidden = true;
+    try{ localStorage.setItem(INSTALL_TIP_KEY, "done"); }catch(e){}
+  }
+  $("installTipClose").addEventListener("click", hide);
+  if (isNativeApp() || isStandalone() || dismissed()) return;
+  if (isIOS()){
+    $("installTipText").textContent = "Put this Bible on your Home Screen: tap the Share button (the square with an arrow), then “Add to Home Screen”. It opens full screen and works offline.";
+    $("installTip").hidden = false;
+    return;
+  }
+  /* Android and desktop Chrome, Edge and Brave offer a real install prompt. */
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    installEvent = e;
+    $("installTipText").textContent = "Install this Bible as an app: it opens full screen and works offline.";
+    $("installTipBtn").hidden = false;
+    $("installTip").hidden = false;
+  });
+  $("installTipBtn").addEventListener("click", function(){
+    if (!installEvent) return;
+    installEvent.prompt();
+    installEvent.userChoice.then(function(){ installEvent = null; hide(); }, hide);
+  });
+  window.addEventListener("appinstalled", hide);
+}
+
+/* ============================================================
    Boot
    ============================================================ */
 function boot(){
   loadState();
   initSettingsUI();
+  initAccount();
+  initInstallTip();
   if ("speechSynthesis" in window){
     refreshVoices();
     speechSynthesis.onvoiceschanged = refreshVoices;
@@ -1694,6 +3106,7 @@ function boot(){
     var startBook = BIBLE[state.book] ? state.book : BOOK_ORDER[0];
     var startCh = (BIBLE[startBook] && BIBLE[startBook][state.chapter]) ? state.chapter : 1;
     openChapter(startBook, startCh);
+    if (session) syncNow(false);
   }).catch(function(err){
     $("pageBody").innerHTML =
       '<div class="loading-msg">The manuscript could not be loaded (' +
@@ -1707,7 +3120,7 @@ function boot(){
 if (document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot);
 else boot();
 
-if ("serviceWorker" in navigator){
+if ("serviceWorker" in navigator && !isNativeApp()){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("service-worker.js").catch(function(e){
       console.warn("Service worker registration failed (offline/install features won't be available):", e);

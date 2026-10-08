@@ -13,7 +13,7 @@ POLICY = [
     "default-src 'none'",
     "script-src {hash}",
     "worker-src 'self'",
-    "connect-src 'self' https://raw.githubusercontent.com",
+    "connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src https://fonts.gstatic.com",
     "img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org",
