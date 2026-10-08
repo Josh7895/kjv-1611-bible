@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-0QA+vIJscKyIWFv64EAEIOiBEjiuSGT0ak6JFl8P5lM='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-7qjIcy6U4Np0xcmANaWjCwfM/RtRqABS2QdLnEnkSaM='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -203,6 +203,19 @@ ul.book-list li{ margin:0; }
 }
 .narration-download:hover{ background:rgba(0,0,0,.05); }
 .narration-download:disabled{ opacity:.6; cursor:default; }
+.tts-controls{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+.tts-btn{
+  min-width:48px; min-height:44px; padding:8px 14px; border-radius:6px;
+  background:var(--panel-bg); border:1px solid var(--rule); color:var(--ink);
+  font-family:'IM Fell English SC', serif; font-size:15px; letter-spacing:.04em; cursor:pointer;
+}
+.tts-btn.primary{ background:var(--rubric); border-color:var(--rubric); color:#fbe9d9; min-width:120px; }
+.tts-btn:disabled{ opacity:.5; cursor:default; }
+.tts-status{
+  font-family:'IM Fell English', serif; font-size:14px; color:var(--ink-soft); margin-top:8px;
+}
+.narration-fallback{ margin-top:10px; }
+.verse-reading{ background-color:rgba(201,162,74,.28); border-radius:3px; box-shadow:0 0 0 2px rgba(201,162,74,.28); }
 
 /* ---- Scripture text ---- */
 .scripture{
@@ -1220,10 +1233,8 @@ function openChapter(book, chapter){
     var vSpan = el("span","verse");
     vSpan.id = "v-" + n;
     var sup = el("sup","vnum", n);
-    if (findLibrivoxFile(book, chapter)){
-      sup.title = "Start narration at verse " + n;
-      sup.addEventListener("click", function(){ seekNarrationToVerse(book, chapter, Number(n)); });
-    }
+    sup.title = "Read aloud from verse " + n;
+    sup.addEventListener("click", function(){ narrateFromVerse(book, chapter, Number(n)); });
     vSpan.appendChild(sup);
     var text = verses[n];
     if (i===0 && text.length){
@@ -1254,7 +1265,7 @@ function openChapter(book, chapter){
   updateBookmarkBtn();
   $("pageEl").scrollIntoView({behavior:"instant", block:"start"});
   window.scrollTo(0,0);
-  if ("speechSynthesis" in window && speechSynthesis.speaking) speechSynthesis.cancel();
+  if (tts.book !== book || tts.chapter !== state.chapter) ttsStop();
   if (state.autoRead) readChapterAloud(true);
 }
 
@@ -1537,9 +1548,14 @@ function seekFractionForVerse(book, chapter, verse){
 var persistentAudio = null; // survives across chapter re-renders when the underlying file hasn't changed
 var narrationDownloadHandler = null; // pending service-worker message listener, so re-clicking doesn't stack listeners
 
+function usingRecording(book, chapter){
+  return state.narrSource !== "tts" && !!findLibrivoxFile(book, chapter) && !recordingFailed[book + " " + chapter];
+}
+var recordingFailed = {}; // chapters whose recording couldn't load this session (e.g. offline and not saved)
+
 function buildNarrationPlayer(book, chapter){
+  if (!usingRecording(book, chapter)) return buildTtsPlayer(book, chapter);
   var match = findLibrivoxFile(book, chapter);
-  if (!match) return null;
 
   var wrap = el("div","narration-player");
   wrap.appendChild(el("div","narration-label",
@@ -1550,6 +1566,7 @@ function buildNarrationPlayer(book, chapter){
   if (!sameFileAlreadyPlaying){
     audio.id = "librivoxAudio";
     audio.controls = true;
+    audio.addEventListener("play", function(){ ttsStop(); });
     audio.preload = "metadata"; // was "none" -- duration never resolved until Play was pressed, so seeking silently never fired
     audio.src = LIBRIVOX_BASE + match.file;
     audio._file = match.file;
@@ -1558,6 +1575,26 @@ function buildNarrationPlayer(book, chapter){
   audio.volume = state.narrVol;
   audio.playbackRate = state.narrRate;
   wrap.appendChild(audio);
+
+  /* If the recording can't load (offline and not saved, archive.org down),
+     offer the device's own voice right here instead of a silent player. */
+  audio.onerror = function(){
+    if (wrap.querySelector(".narration-fallback")) return;
+    var fb = el("div","narration-fallback");
+    fb.appendChild(el("div","narration-note","The recording couldn\u2019t load (are you offline?)."));
+    if ("speechSynthesis" in window){
+      var useTts = el("button","tts-btn primary","\u25B6 Use device voice");
+      useTts.addEventListener("click", function(){
+        recordingFailed[book + " " + chapter] = true;
+        if (persistentAudio === audio) persistentAudio = null;
+        var player = buildTtsPlayer(book, chapter);
+        wrap.parentNode.replaceChild(player, wrap);
+        ttsPlay(book, chapter, 0);
+      });
+      fb.appendChild(useTts);
+    }
+    wrap.appendChild(fb);
+  };
 
   function seekTo(fraction){
     function apply(){
@@ -1605,32 +1642,222 @@ function seekNarrationToVerse(book, chapter, verse){
   else audio.addEventListener("loadedmetadata", apply, {once:true});
 }
 
+/* Tapping a verse number starts narration there, whichever narrator is in use. */
+function narrateFromVerse(book, chapter, verse){
+  if (usingRecording(book, chapter)) seekNarrationToVerse(book, chapter, verse);
+  else ttsPlay(book, chapter, verse);
+}
+
 /* keepPlaying: set by auto-read on page turn, so narration already playing
    carries on instead of being toggled to paused. */
 function readChapterAloud(keepPlaying){
-  var match = findLibrivoxFile(state.book, state.chapter);
-  var audioEl = (match && state.narrSource!=="tts") ? $("librivoxAudio") : null;
+  var audioEl = usingRecording(state.book, state.chapter) ? $("librivoxAudio") : null;
   if (audioEl){
     if (!audioEl.paused){ if (!keepPlaying) audioEl.pause(); }
     else { audioEl.play().catch(function(){}); }
     return;
   }
-  if (!("speechSynthesis" in window)){
-    alert("This browser doesn't support built-in text-to-speech. Try Chrome, Edge, or Safari.");
-    return;
-  }
-  if (speechSynthesis.speaking){ speechSynthesis.cancel(); return; }
-  var verses = BIBLE[state.book][state.chapter];
+  var player = $("ttsPlayer");
+  if (player && !keepPlaying) player.scrollIntoView({behavior:"smooth", block:"nearest"});
+  if (!("speechSynthesis" in window)) return; // the player itself explains why
+  if (tts.playing){ if (!keepPlaying) ttsPause(); return; }
+  var resume = (tts.book === state.book && tts.chapter === state.chapter) ? tts.verse : 1;
+  ttsPlay(state.book, state.chapter, resume);
+}
+
+/* ============================================================
+   Device voice (speechSynthesis), read one verse at a time.
+   Speaking verse by verse rather than the whole chapter at once:
+   - Chrome stops long utterances after ~15 seconds, and Android
+     refuses very long text outright;
+   - pause()/resume() are unreliable on Android and iOS, so Pause
+     cancels and Play restarts at the current verse instead;
+   - the verse being read can be highlighted on every browser.
+   ============================================================ */
+var tts = { book:null, chapter:null, verse:1, chunks:[], idx:0, playing:false, token:0, utter:null };
+
+function ttsChunks(book, chapter){
+  var verses = BIBLE[book][chapter];
   var nums = Object.keys(verses).sort(function(a,b){return a-b;});
-  var text = nums.map(function(n){ return verses[n]; }).join(" ");
-  var utter = new SpeechSynthesisUtterance(text);
-  utter.rate = state.narrRate;
-  utter.volume = state.narrVol;
+  var out = [];
+  nums.forEach(function(n){
+    var text = verses[n], v = Number(n);
+    /* split long verses at punctuation so no single utterance runs long */
+    while (text.length > 220){
+      var cut = -1, m, re = /[;:,.?!]\s/g;
+      while ((m = re.exec(text)) && m.index < 220) cut = m.index + 1;
+      if (cut < 40) cut = text.lastIndexOf(" ", 220);
+      if (cut < 1) break;
+      out.push({v:v, text:text.slice(0, cut)});
+      text = text.slice(cut).replace(/^\s+/, "");
+    }
+    if (text) out.push({v:v, text:text});
+  });
+  return out;
+}
+
+function ttsPickVoice(){
+  if (!voicesCache.length && "speechSynthesis" in window) voicesCache = speechSynthesis.getVoices();
   if (state.narrVoice){
-    var v = voicesCache.filter(function(v){ return v.name===state.narrVoice; })[0];
-    if (v) utter.voice = v;
+    var chosen = voicesCache.filter(function(v){ return v.name===state.narrVoice; })[0];
+    if (chosen) return chosen;
   }
-  speechSynthesis.speak(utter);
+  /* Phones set to another language would otherwise read English in that
+     language's voice; prefer an English one. */
+  var en = voicesCache.filter(function(v){ return /^en[-_]/i.test(v.lang) && v.localService; });
+  if (!en.length) en = voicesCache.filter(function(v){ return /^en[-_]/i.test(v.lang); });
+  return en[0] || null;
+}
+
+function ttsHighlight(verse){
+  var prev = document.querySelectorAll(".verse-reading");
+  for (var i=0; i<prev.length; i++) prev[i].classList.remove("verse-reading");
+  if (!verse) return;
+  var vEl = $("v-" + verse);
+  if (!vEl) return;
+  vEl.classList.add("verse-reading");
+  var r = vEl.getBoundingClientRect();
+  if (r.top < 0 || r.bottom > (window.innerHeight || document.documentElement.clientHeight)){
+    vEl.scrollIntoView({behavior:"smooth", block:"center"});
+  }
+}
+
+function ttsSpeakCurrent(){
+  var token = ++tts.token;
+  var chunk = tts.chunks[tts.idx];
+  if (!chunk){ ttsFinished(); return; }
+  tts.verse = chunk.v;
+  ttsHighlight(chunk.v);
+  ttsUpdateUI();
+  var u = new SpeechSynthesisUtterance(chunk.text);
+  u.rate = state.narrRate;
+  u.volume = state.narrVol;
+  var voice = ttsPickVoice();
+  if (voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US";
+  u.onend = function(){
+    if (token !== tts.token || !tts.playing) return;
+    tts.idx++;
+    ttsSpeakCurrent();
+  };
+  u.onerror = function(e){
+    if (token !== tts.token) return;
+    if (e && (e.error === "interrupted" || e.error === "canceled")) return;
+    tts.playing = false;
+    ttsUpdateUI(e && e.error === "not-allowed" ? "Tap Play to start reading." : "Your device voice stopped. Tap Play to try again.");
+  };
+  tts.utter = u; // keep a reference: Chrome drops onend for garbage-collected utterances
+  speechSynthesis.speak(u);
+  /* Safari and Chrome can be left paused by another tab or app */
+  if (speechSynthesis.paused) speechSynthesis.resume();
+}
+
+function ttsPlay(book, chapter, verse){
+  if (!("speechSynthesis" in window)) return;
+  if (tts.book !== book || tts.chapter !== chapter){
+    tts.book = book; tts.chapter = chapter;
+    tts.chunks = ttsChunks(book, chapter);
+  }
+  tts.idx = 0;
+  for (var i=0; i<tts.chunks.length; i++){ if (tts.chunks[i].v >= (verse||1)){ tts.idx = i; break; } }
+  stopOtherNarration();
+  speechSynthesis.cancel();
+  tts.playing = true;
+  ttsSpeakCurrent();
+}
+
+function ttsPause(){
+  tts.playing = false;
+  tts.token++;
+  if ("speechSynthesis" in window) speechSynthesis.cancel();
+  ttsUpdateUI();
+}
+
+function ttsStop(){
+  var wasActive = tts.playing || tts.book !== null;
+  tts.playing = false;
+  tts.token++;
+  tts.book = tts.chapter = null; tts.chunks = []; tts.idx = 0; tts.verse = 1;
+  if ("speechSynthesis" in window && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+  if (wasActive){ ttsHighlight(null); ttsUpdateUI(); }
+}
+
+function ttsSkip(delta){
+  if (!tts.chunks.length){ ttsPlay(state.book, state.chapter, 1); return; }
+  var target = Math.max(1, tts.verse + delta);
+  var last = tts.chunks[tts.chunks.length-1].v;
+  if (target > last) target = last;
+  if (tts.playing) ttsPlay(tts.book, tts.chapter, target);
+  else {
+    for (var i=0; i<tts.chunks.length; i++){ if (tts.chunks[i].v >= target){ tts.idx = i; break; } }
+    tts.verse = target; ttsHighlight(target); ttsUpdateUI();
+  }
+}
+
+function ttsFinished(){
+  tts.playing = false;
+  ttsHighlight(null);
+  var finished = tts.book;
+  tts.book = tts.chapter = null; tts.chunks = []; tts.idx = 0; tts.verse = 1;
+  ttsUpdateUI("Finished this chapter.");
+  /* With auto-read on, carry on into the next chapter like an audiobook */
+  if (finished && state.autoRead) navigateChapter(1);
+}
+
+/* Pause the recording when the device voice starts, so the two never overlap. */
+function stopOtherNarration(){
+  var a = $("librivoxAudio");
+  if (a && !a.paused) a.pause();
+}
+
+function ttsUpdateUI(message){
+  var player = $("ttsPlayer");
+  if (!player) return;
+  var playBtn = player.querySelector(".tts-play");
+  var status = player.querySelector(".tts-status");
+  var total = Object.keys(BIBLE[state.book][state.chapter]).length;
+  var here = (tts.book === state.book && tts.chapter === state.chapter);
+  playBtn.textContent = tts.playing ? "❚❚ Pause" : (here && tts.verse > 1 ? "▶ Resume" : "▶ Play");
+  playBtn.setAttribute("aria-pressed", tts.playing ? "true" : "false");
+  player.querySelector(".tts-stop").disabled = !here;
+  status.textContent = message || (here ? (tts.playing ? "Reading verse " : "Paused at verse ") + tts.verse + " of " + total : "");
+}
+
+function buildTtsPlayer(book, chapter){
+  var wrap = el("div","narration-player");
+  wrap.id = "ttsPlayer";
+  if (!("speechSynthesis" in window)){
+    wrap.appendChild(el("div","narration-note",
+      "This browser can’t read aloud. Turn on “Real narration” in Settings, or try Safari, Chrome or Edge."));
+    return wrap;
+  }
+  wrap.appendChild(el("div","narration-label",
+    "Read aloud by your device’s voice — tap a verse number to start there"));
+  var controls = el("div","tts-controls");
+  function btn(cls, label, aria, fn){
+    var b = el("button","tts-btn " + cls, label);
+    b.type = "button";
+    b.setAttribute("aria-label", aria);
+    b.addEventListener("click", fn);
+    controls.appendChild(b);
+    return b;
+  }
+  btn("tts-back", "⏮", "Previous verse", function(){ ttsSkip(-1); });
+  btn("tts-play primary", "▶ Play", "Play or pause", function(){
+    if (tts.playing) ttsPause();
+    else {
+      var here = (tts.book === book && tts.chapter === chapter);
+      ttsPlay(book, chapter, here ? tts.verse : 1);
+    }
+  });
+  btn("tts-next", "⏭", "Next verse", function(){ ttsSkip(1); });
+  btn("tts-stop", "■ Stop", "Stop reading", function(){ ttsStop(); });
+  wrap.appendChild(controls);
+  var status = el("div","tts-status");
+  status.setAttribute("aria-live","polite");
+  wrap.appendChild(status);
+  /* render before the player is in the page, then refresh once it is */
+  setTimeout(ttsUpdateUI, 0);
+  return wrap;
 }
 
 /* ============================================================
@@ -1842,6 +2069,9 @@ function initSettingsUI(){
   $("narrRateRange").addEventListener("change", function(){ saveState(); });
   $("narrSourceSelect").addEventListener("change", function(e){
     state.narrSource = e.target.value; saveState();
+    ttsStop();
+    var a = $("librivoxAudio"); if (a && !a.paused) a.pause();
+    openChapter(state.book, state.chapter);
   });
   $("voiceSelect").addEventListener("change", function(e){
     state.narrVoice = e.target.value; saveState();
