@@ -1,0 +1,10 @@
+{
+  "appId": "com.josh7895.kjv1611bible",
+  "appName": "1611 Bible",
+  "webDir": "www",
+  "backgroundColor": "#12100c",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#12100c"
+  }
+}

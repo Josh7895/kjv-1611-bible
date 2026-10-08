@@ -25,8 +25,9 @@ Open the hosted app in Safari (iPhone) or Chrome/Brave (Android), then:
   (or Install app in the browser menu).
 
 It then opens full screen from its own icon, keeps clear of the notch, and
-works offline. A true App Store app would need a Mac, Xcode and a paid Apple
-developer account to wrap this same site; nothing here prevents that later.
+works offline. A true App Store app needs a paid Apple
+developer account to sign. The App Store version is already set up and
+builds on GitHub's cloud Macs (no Mac needed); see [APP-STORE.md](APP-STORE.md).
 
 ## Accounts (optional)
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-6hnOXyD7Aw2SVlT2oxi3ssV5W/nODPFsncbSp8DCQsg='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-WvrJygQOMkVrZvjY5BtXodGjAiJa/PYpDldrwKuWnFU='; worker-src 'self'; connect-src 'self' https://raw.githubusercontent.com https://*.supabase.co; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' https://commons.wikimedia.org https://upload.wikimedia.org https://thumb.wikimedia.org; media-src https://archive.org https://*.archive.org; manifest-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Holy Bible &mdash; Anno 1611</title>
@@ -1360,7 +1360,9 @@ function updateOfflineStatus(msg){
   if (s) s.textContent = msg;
 }
 function refreshOfflineStatusMessage(){
-  if (!("serviceWorker" in navigator)){
+  if (isNativeApp()){
+    updateOfflineStatus("The Bible text is built into this app and always works offline. Narration, music and engravings need an internet connection.");
+  } else if (!("serviceWorker" in navigator)){
     updateOfflineStatus("This browser doesn't support offline mode.");
   } else if (!navigator.serviceWorker.controller){
     updateOfflineStatus("Offline mode needs this page to be hosted (not opened as a local file). Once hosted, reload once and this will activate.");
@@ -2435,6 +2437,10 @@ function initAccount(){
 /* ============================================================
    Install as an app (home screen)
    ============================================================ */
+/* True inside the App Store build (Capacitor wraps this page in a native app). */
+function isNativeApp(){
+  return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+}
 function isIOS(){
   return /iPhone|iPad|iPod/.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
@@ -2452,7 +2458,7 @@ function initInstallTip(){
     try{ localStorage.setItem(INSTALL_TIP_KEY, "done"); }catch(e){}
   }
   $("installTipClose").addEventListener("click", hide);
-  if (isStandalone() || dismissed()) return;
+  if (isNativeApp() || isStandalone() || dismissed()) return;
   if (isIOS()){
     $("installTipText").textContent = "Put this Bible on your Home Screen: tap the Share button (the square with an arrow), then “Add to Home Screen”. It opens full screen and works offline.";
     $("installTip").hidden = false;
@@ -2505,7 +2511,7 @@ function boot(){
 if (document.readyState==="loading") document.addEventListener("DOMContentLoaded", boot);
 else boot();
 
-if ("serviceWorker" in navigator){
+if ("serviceWorker" in navigator && !isNativeApp()){
   window.addEventListener("load", function(){
     navigator.serviceWorker.register("service-worker.js").catch(function(e){
       console.warn("Service worker registration failed (offline/install features won't be available):", e);

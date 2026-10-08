@@ -1,0 +1,117 @@
+name: iPhone app build
+
+# Builds the App Store version (the same web app wrapped by Capacitor) on
+# GitHub's cloud Macs, so no Mac is needed. Every run builds it and opens it
+# in an iPhone simulator without any Apple account. To send a build to
+# TestFlight / the App Store, run this workflow by hand (Actions tab ->
+# iPhone app build -> Run workflow) with "upload" ticked, after adding the
+# Apple secrets listed in APP-STORE.md.
+
+on:
+  pull_request:
+    paths:
+      - "index.html"
+      - "service-worker.js"
+      - "manifest.json"
+      - "auth-config.json"
+      - "data/**"
+      - "icons/**"
+      - "art/**"
+      - "ios/**"
+      - "capacitor.config.json"
+      - "package.json"
+      - "package-lock.json"
+      - "tools/build-www.js"
+      - ".github/workflows/ios-build.yml"
+  push:
+    branches: [master]
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "Sign and upload to App Store Connect (TestFlight). Needs the Apple secrets."
+        type: boolean
+        default: false
+
+jobs:
+  ios:
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Copy the web app into the iPhone project
+        run: |
+          npm ci
+          npm run ios:sync
+
+      - name: Build for the iPhone simulator (no Apple account needed)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Debug \
+            -sdk iphonesimulator -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "$RUNNER_TEMP/sim" CODE_SIGNING_ALLOWED=NO build
+
+      - name: Open the app in an iPhone simulator
+        run: |
+          UDID=$(xcrun simctl list devices available -j | python3 -c '
+          import json, sys
+          devs = [d for rt, ds in json.load(sys.stdin)["devices"].items() if "iOS" in rt for d in ds if d["name"].startswith("iPhone")]
+          print(devs[-1]["udid"])')
+          xcrun simctl boot "$UDID"
+          xcrun simctl bootstatus "$UDID" -b
+          APP=$(find "$RUNNER_TEMP/sim/Build/Products/Debug-iphonesimulator" -maxdepth 1 -name "*.app" | head -1)
+          xcrun simctl install "$UDID" "$APP"
+          xcrun simctl launch "$UDID" com.josh7895.kjv1611bible
+          sleep 20
+          # Still running after 20 seconds means it started and didn't crash.
+          xcrun simctl spawn "$UDID" launchctl list | grep -q "com.josh7895.kjv1611bible"
+          mkdir -p screenshots
+          xcrun simctl io "$UDID" screenshot screenshots/iphone-simulator.png
+
+      - name: Save the simulator screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: iphone-simulator-screenshot
+          path: screenshots/iphone-simulator.png
+
+      - name: Build an unsigned App Store archive (checks the device build)
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination "generic/platform=iOS" -archivePath "$RUNNER_TEMP/Unsigned.xcarchive" \
+            CODE_SIGNING_ALLOWED=NO archive
+
+      - name: Sign and upload to App Store Connect
+        if: github.event_name == 'workflow_dispatch' && inputs.upload
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          for v in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_KEY_P8; do
+            if [ -z "${!v}" ]; then echo "::error::Missing repository secret $v (see APP-STORE.md)"; exit 1; fi
+          done
+          KEY="$RUNNER_TEMP/AuthKey.p8"
+          printf '%s\n' "$ASC_KEY_P8" > "$KEY"
+          AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY" -authenticationKeyID "$ASC_KEY_ID" -authenticationKeyIssuerID "$ASC_ISSUER_ID")
+          xcodebuild -project ios/App/App.xcodeproj -scheme App -configuration Release \
+            -destination "generic/platform=iOS" -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" CODE_SIGN_STYLE=Automatic \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}" "${AUTH[@]}" archive
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$APPLE_TEAM_ID</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          PLIST
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/App.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}"
+          rm -f "$KEY"
+          echo "Uploaded build ${{ github.run_number }}. It appears in App Store Connect -> TestFlight after Apple finishes processing."
